@@ -1,0 +1,174 @@
+body {
+	background-image: URL('images/login_back.jpg');
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+
+html {
+	position: relative;
+	min-height: 100%;
+}
+
+/*  for login heading css */
+.heading1-font{
+	font-size:24px; color:#0c426f !important;
+ }
+ .heading2-font{
+ 	font-size:15px;color:#1f7f51 !important;
+ 	font-weight: bold;
+    line-height: 22px;
+ }
+ .heading2-colr{
+    color:#1f7f51 !important;
+ }
+
+/* ************************* */
+/*  for login background css */
+	.loginbground{
+	    background-image: linear-gradient(#e2cdc6, #246339);
+}
+/* ************************* */
+
+.panel-heading .panel-title {
+    padding-top: 7px;
+    padding-bottom: 7px;
+    font-size: 15px;
+    font-weight: bold;
+    text-align: center;
+    color: #ffffff !important;
+    font-family: Calibri, verdana,Arial, Helvetica, sans-serif;
+}
+.container-padding{
+	padding-top: 20px; padding-bottom:20px
+}
+
+/* **************************dashboard*********************************************************** */
+     .box {
+          box-shadow: 2px 2px 8px #ccc;
+          height: 91px;
+          margin: 5px 0px 5px 0px;;
+      }
+      .sub-box1 {
+          color: #fff;
+          text-align: center;
+          padding-top: 15px;
+          height: 90px;
+          background-image: linear-gradient(to right, #28563a,#936c15);
+      }
+      .sub-box2 {
+          color: #fff;
+          text-align: center;
+          padding-top: 15px;
+          height: 90px;
+          background-image: linear-gradient(to right, #28563a,#936c15);
+      }
+      .sub-box3 {
+          color: #fff;
+          text-align: center;
+          padding-top: 15px;
+          height:90px;
+          background-image: linear-gradient(to right, #28563a,#936c15);
+      }
+      .sub-box4 {
+          color: #fff;
+          text-align: center;
+          padding-top: 15px;
+          height: 90px;
+          background-image: linear-gradient(to right, #28563a,#936c15);
+      }
+      .sub-box1 i {
+          font-size: 50px;
+          color: #fff;
+      }
+      .sub-box2 i {
+          font-size: 50px;
+          color: #fff;
+      }
+      .sub-box3 i {
+          font-size: 50px;
+          color: #fff;
+      }
+      .sub-box4 i {
+          font-size: 50px;
+          color: #fff;
+      }
+   .wrapper {
+        display: inline-block;
+        padding-left: 20px;
+        padding-right: 20px;
+        padding-bottom: 15px;
+        padding-top: 0px;
+        width: 100%;
+    }
+    .m-t-top{
+        margin-top: 1%;
+    }
+     .message-p {
+        padding: 15px 0px !important;
+        background: #fff;
+        box-shadow: 0px 0px 3px rgb(112, 112, 112);
+    }
+     
+    .module-name{
+    	padding: 15px 0 15px 0px;
+    	text-align: left;
+    }
+    .huge{font-size:35px;}
+    .circle-align{
+	text-align: -webkit-center;
+}
+
+.circle {
+  padding: 14px 12px;
+  border: 3px solid green;
+  text-align: center;
+  border-radius: 50%;
+  height: 66px;
+  width: 66px;
+}
+.circleSal {
+  border: 3px solid red !important;
+  border-radius: 42% 1% 37% 5% !important;
+}
+      
+.box {
+    box-shadow: 2px 2px 8px #ccc;
+    height: 270px;
+    }
+ .container {
+  width: 80%;
+  margin: 15px auto;
+}
+.li-info{font-weight:bold;
+	color:#0c426f;
+	}
+body{
+	background: #ffffff;
+	}
+.grAlign{
+	padding-top:20px;
+	}
+.color1{
+	color:#0c426f;
+	}
+.color2{
+	color:#2ecc71;
+	}
+.color3{
+	color:#3498db;
+	}
+.graph-size{
+	min-height:175px;
+	max-height:245px;
+	}
+.count{
+	font-size:20px;
+	}
+	table.tableGrid th { background-color: #bb9c2b;
+	    border: 1px solid #1ea2cd !important;
+	    color: #0c426f;
+     }
+     .close {
+    	opacity: 1 !important;
+    	color: red !important;
+	 }
