@@ -6,6 +6,10 @@ $(document).ready(function(){
 });
 
 
+
+
+
+
 function vldSearch(){
 	var college_id=$("#college_name").val();
 	var request_id=$("#request_name").val();
