@@ -29,6 +29,8 @@ public class InspectorInspectionModel extends Common {
 	private String new_course_name;
 	private String old_degree;
 	private String degree;
+	private String s_district;
+	private String is_convinor;
 	
 	
 	public String getPROP_INST_NAME() {
@@ -603,7 +605,27 @@ public class InspectorInspectionModel extends Common {
 	public void setDoj(String doj) {
 		this.doj = doj;
 	}
+	public String getS_district() {
+		return s_district;
+	}
+	public void setS_district(String s_district) {
+		this.s_district = s_district;
+	}
 	
-	//Society info Create new model
+	//MemberDetails for new requirement add in model
+	private JSONArray membersDetails;
+	public JSONArray getMembersDetails() {
+		return membersDetails;
+	}
+	public void setMembersDetails(JSONArray membersDetails) {
+		this.membersDetails = membersDetails;
+	}
+	public String getIs_convinor() {
+		return is_convinor;
+	}
+	public void setIs_convinor(String is_convinor) {
+		this.is_convinor = is_convinor;
+	}
+
 	
 }

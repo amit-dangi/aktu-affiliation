@@ -63,12 +63,12 @@ try {
                     	+'<td style="text-align:center; width:8%;">'+contact+'</td>'
                     	+'<td style="text-align:center; width:8%;">'+email+'</td>'
                     	+'<td style="text-align:center; width:10%;"><a onclick="downloadJasperReport('+"'"+''+AF_REG_ID+''+"'"+','+"'"+''+session_id+''+"'"+')"><b>Click Here to View</b></a></td>'
-                    	+'<td style="text-align:center; width:8%;">'+panel_name+'</td>'
+                    	/*+'<td style="text-align:center; width:8%;">'+panel_name+'</td>'
                     	
             			cols +='<td style="text-align:center; width:6%;">'
             			cols +='<button type="button" class="btn btn-success" '
         				cols +='id="" onClick="actionClick('+"'"+''+panel_name+''+"'"+','+"'"+''+AF_REG_ID+''+"'"+','+"'"+''+panel_code+''+"'"+','+"'"+''+registrar_remark+''+"'"+','+"'"+''+registrar_recm+''+"'"+','+"'"+''+REG_FOR_NAME+''+"'"+','+"'"+''+registrar_name+''+"'"+')">Action</button></td>'
-                	
+                	*/
                     	cols +='<input type="hidden" id="registrar_inspection_id_'+AF_REG_ID+'" value="'+val.governbody_inspection_id+'" />'
                     	+'<input type="hidden" id="governbody_id_'+AF_REG_ID+'" value="'+val.governbody_id+'" />'
                     	+'<input type="hidden" id="governbody_remarks_'+AF_REG_ID+'" value="'+val.governbody_remarks+'" />'

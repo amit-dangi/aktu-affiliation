@@ -34,6 +34,7 @@ public class NewAffiRequestApprovalModel extends Common{
 	private String email_id;
 	private String dpassword;
 	private String affiliation_type;
+	private String DIRECTOR_NAME;
 	
 	public String getFrom_date() {
 		return from_date;
@@ -220,6 +221,12 @@ public class NewAffiRequestApprovalModel extends Common{
 	}
 	public void setAffiliation_type(String affiliation_type) {
 		this.affiliation_type = affiliation_type;
+	}
+	public String getDIRECTOR_NAME() {
+		return DIRECTOR_NAME;
+	}
+	public void setDIRECTOR_NAME(String dIRECTOR_NAME) {
+		DIRECTOR_NAME = dIRECTOR_NAME;
 	}
 	
 

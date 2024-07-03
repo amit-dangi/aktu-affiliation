@@ -5,12 +5,11 @@ $(document).ready(function(){
 		location.reload();
 	});
 	
-	
 	$("#insp_status").on("change", function(){
 		$('#btnSave').show();
 		var selectedValue = $(this).val();
 	    if (selectedValue === "Y") {
-	        $('#btnSave,#btnSave1').text("Application Accepted & transfer to Inspection Committee");
+	        $('#btnSave,#btnSave1').text("Application OK & transfer to Inspection Committee");
 	    } else if (selectedValue === "N") {
 	        $('#btnSave,#btnSave1').text("Application Rejected & acknowledgement mail shared to college");
 	    } else {

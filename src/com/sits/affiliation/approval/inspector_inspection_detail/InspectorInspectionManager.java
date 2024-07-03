@@ -17,6 +17,7 @@ import org.apache.log4j.Logger;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.sits.affiliation.transaction.inspection_approval_panel.InspectionApprovalPanelManager;
 import com.sits.commonApi.commonAPI;
 import com.sits.conn.DBConnection;
 import com.sits.general.ApplicationConstants;
@@ -377,8 +378,9 @@ public class InspectorInspectionManager {
 	        			+ "session,PROP_INST_NAME,contact,email,AF_REG_ID,REG_NO,date_format(Payment_Date,'%d/%m/%Y') as Payment_Date,panel_code,review_remarks,"
 	        			+ "is_final_submit_app,coalesce((select (case when member_type is not null then 'Y' else 'N' END) from af_approv_pannel_detail where panel_id=crm.panel_code and member_type='"+General.checknull(raModel.getInspection_by())+"' and issActive='Y' LIMIT 1),'N') "
 	        			+ "as is_pannel_member,coalesce((select (case when member_type is not null then 'Y' else 'N' END) from af_approv_pannel_detail where panel_id=crm.panel_code and member_type='"+General.checknull(raModel.getInspection_by())+"' and issActive='Y' and is_convenor='Y' LIMIT 1),'N') as is_convinor, "
-    					+ "(select member_type from af_approv_pannel_detail where panel_id=crm.panel_code  and issActive='Y' and is_convenor='Y' LIMIT 1) as convinor_id from af_clg_reg_mast crm,af_apply_for_affiliation aff "
-	        			+ "where crm.AF_REG_ID=aff.AFF_ID and is_final_submit_app='Y' and crm.panel_code is not null and session='"+General.checknull(raModel.getSession_id())+"' ";
+    					+ "(select member_type from af_approv_pannel_detail where panel_id=crm.panel_code  and issActive='Y' and is_convenor='Y' LIMIT 1) as convinor_id,DISTRICT from af_clg_reg_mast crm,af_apply_for_affiliation aff "
+	        			+ "where crm.AF_REG_ID=aff.AFF_ID and is_final_submit_app='Y' and session='"+General.checknull(raModel.getSession_id())+"' and DISTRICT='"+General.checknull(raModel.getS_district())+"' ";
+	        			//		+ "and aff.request_id='RT0001' ";
 	        			
 	        			if(!General.checknull(raModel.getInst_name()).trim().equals("")){
 	        				query += "and PROP_INST_NAME like '%"+General.checknull(raModel.getInst_name())+"%' ";
@@ -392,7 +394,7 @@ public class InspectorInspectionManager {
 	        			if(!(General.checknull(raModel.getXFROMDATE()).trim().equals("") && General.checknull(raModel.getXTODATE()).trim().equals("")) ){
 			        		query += "and date_format(review_date,'%d/%m/%Y') between '"+General.checknull(raModel.getXTODATE())+"' and '"+General.checknull(raModel.getXFROMDATE())+"' ";
 						}
-	        			query += " order by is_final_submit_app_dt asc";
+	        			query += "and crm.panel_code is not null and AF_REG_ID in (select af_reg_id from af_inspection_member_detail where isfinalsubmited='Y') order by is_final_submit_app_dt asc";
 	 			psmt = conn.prepareStatement(query);
 	 			System.out.println("InspectorInspectionManager getApplicationDetails psmt||"+psmt);
 	 			rst = psmt.executeQuery();
@@ -458,11 +460,13 @@ public class InspectorInspectionManager {
 		String query = "" ,inspection_by=formModel.getInspection_by();
 		int count = 0,i=0;
 		int delcount=0;
+		int cnt[]=null;
 		JSONObject jSonDataFinalObj = new JSONObject();
 		try {
 			conn = DBConnection.getConnection();
 			conn.setAutoCommit(false);
 			String inspection_id=formModel.getInspection_id();
+			String is_convinor=formModel.getIs_convinor();
 			/*if(formModel.getIsfinalsubmited().equals("Y")){
 				query="update af_inspection_member_detail set isfinalsubmited=?,UPDATED_BY=?,UPDATE_DATE=now(),"
 						+ "UPDATE_MACHINE=? where session=? and af_reg_id=? and inspection_by='"+inspection_by+"' ";
@@ -487,7 +491,8 @@ public class InspectorInspectionManager {
 				jSonDataFinalObj.put("flag", "N");
 				}	
 			}else{*/
-				if(!inspection_id.equals("")){
+				/*if(!inspection_id.equals("")){
+					System.out.println("in if");	
 					query="update af_inspection_member_detail set isfinalsubmited=?,insp_remarks=?,insp_recm=?,"
 						+ "UPDATED_BY=?,UPDATE_DATE=now(),"
 						+ "UPDATE_MACHINE=? where session=? and inspection_id=? and inspection_by='"+inspection_by+"' ";
@@ -503,33 +508,61 @@ public class InspectorInspectionManager {
 					//System.out.println("InspectorInspectionManager update af_inspection_member_detail ||"+psmt);
 					count = psmt.executeUpdate();
 					
-				}else {
-			/*String delqry = "DELETE FROM af_inspection_member_detail where inspection_by='"+inspection_by+"'"
-					+ " and session='"+formModel.getSession_id()+"' and af_reg_id='"+formModel.getInst_Id()+"'";
+				}else {*/
+				System.out.println("in else");
+				String inst_id=General.checknull(formModel.getInst_Id());
+			String delqry = "DELETE FROM af_inspection_member_detail where inspection_by='"+inspection_by+"'"
+					+ " and session='"+formModel.getSession_id()+"' and af_reg_id='"+inst_id+"' and inspection_type in ('Inspector','Member')";
 			PreparedStatement psmtdel= conn.prepareStatement(delqry);
-			delcount=psmtdel.executeUpdate();*/
-			 
-			query="insert into af_inspection_member_detail (session,af_reg_id,inspection_by,insp_remarks,insp_recm,CREATED_BY,CREATED_DATE,CREATED_MACHINE,inspection_type) "
-					+ "values(?,?,?,?,?,?,now(),?,'Inspector')";
-			psmt = conn.prepareStatement(query,psmt.RETURN_GENERATED_KEYS);
-			psmt.setString(1, General.checknull(formModel.getSession_id()));
-			psmt.setString(2, General.checknull(formModel.getInst_Id()));
-			psmt.setString(3, inspection_by);
-			psmt.setString(4, General.checknull(formModel.getInsp_remarks()));
-			psmt.setString(5, General.checknull(formModel.getInsp_recm()));
-			psmt.setString(6, user_id);
-			psmt.setString(7, General.checknull(formModel.getIp()));
-			
-			//System.out.println("InspectorInspectionManager insert af_inspection_member_detail ||"+psmt);
-			count = psmt.executeUpdate();
-			ResultSet rs = psmt.getGeneratedKeys();
-
-				if (rs.next()) {
-					inspection_id = rs.getString(1);
-				}
-			
-			}
-			if (count > 0) 
+			delcount=psmtdel.executeUpdate();
+	query="insert into af_inspection_member_detail (session,af_reg_id,inspection_by,insp_remarks,insp_recm,"
+			+ "emp_type,member_name,department,designation,contant_no,is_member_head,"
+			+ "CREATED_BY,CREATED_DATE,CREATED_MACHINE,inspection_type,isfinalsubmited) "
+			+ "values(?,?,?,?,?,?,?,?,?,?,?,?,now(),?,?,?)";
+		psmt = conn.prepareStatement(query,psmt.RETURN_GENERATED_KEYS);
+				for(int t=0; t<formModel.getMembersDetails().size(); t++){	
+					JSONObject reqobj = (JSONObject) formModel.getMembersDetails().get(t);
+					System.out.println("reqobj||"+reqobj);
+	            	if(reqobj != null){
+				psmt.setString(1, General.checknull(formModel.getSession_id()));
+				psmt.setString(2, inst_id);
+				psmt.setString(3, inspection_by);
+				psmt.setString(4, General.checknull(reqobj.get("insp_remarks").toString()));
+				psmt.setString(5, General.checknull(reqobj.get("Insp_recm").toString()));
+				
+				psmt.setString(6, General.checknull(reqobj.get("XMTYPE").toString()));
+				psmt.setString(7, General.checknull(reqobj.get("XNAME").toString()));
+				psmt.setString(8, General.checknull(reqobj.get("XDEPARTMT").toString()));
+				psmt.setString(9, General.checknull(reqobj.get("XPOST").toString()));
+				psmt.setString(10, General.checknull(reqobj.get("XCONTACT").toString()));
+				psmt.setString(11, General.checknull(is_convinor));
+				
+				psmt.setString(12, user_id);
+				psmt.setString(13, General.checknull(formModel.getIp()));
+				//String ishead=General.checknull(reqobj.get("XCONV").toString());
+				psmt.setString(14, is_convinor.equals("Y")?"Inspector":"Member");
+				psmt.setString(15, General.checknull(formModel.getIsfinalsubmited()));
+				//System.out.println("InspectorInspectionManager insert af_inspection_member_detail ||"+psmt);
+				//count = psmt.executeUpdate();
+				/*ResultSet rs = psmt.getGeneratedKeys();
+	
+					if (rs.next()) {
+						inspection_id = rs.getString(1);
+					}*/
+					psmt.addBatch();
+				    }
+	            	}
+	            	cnt = psmt.executeBatch();
+	            	/*ResultSet rs = psmt.getGeneratedKeys();
+	            	
+					if (rs.next()) {
+						inspection_id = rs.getString(1);
+						System.out.println("inspection_id||"+inspection_id);
+					}*/
+					
+			/*}*/
+			if (cnt.length > 0) 
+				if(is_convinor.equals("Y")){
 				if(saveComputerDetailslist(conn,formModel))
 				if(saveadministrativeAmenitiesDetailslist(conn,formModel))
 					if(saveInfrastructureDetailslist(conn,formModel))
@@ -541,16 +574,26 @@ public class InspectorInspectionManager {
 							while (iter.hasNext()) {
 								FileItem fileItem = iter.next();
 								String docName="";
-								 saveDoc(machine,General.checknull(formModel.getInst_Id()), inspection_id, user_id, conn, fileItem);
+								 saveDoc(machine,inst_id, inspection_id, user_id, conn, fileItem);
 					}
 					}
+					
 					conn.commit();
-					jSonDataFinalObj.put("status", "Inspection Details Saved Successfully");
+					jSonDataFinalObj.put("status", "CDO/ADM Inspection Details Saved Successfully");
 					jSonDataFinalObj.put("flag", "Y");
 				}else {
 					conn.rollback();				
 					jSonDataFinalObj.put("status", ApplicationConstants.EXCEPTION_MESSAGE);
 					jSonDataFinalObj.put("flag", "N");
+				}
+				}else{
+					conn.commit();
+				jSonDataFinalObj.put("status", "Inspection Member Recommendation Saved Successfully");
+				jSonDataFinalObj.put("flag", "Y");
+			}else {
+				conn.rollback();				
+				jSonDataFinalObj.put("status", ApplicationConstants.EXCEPTION_MESSAGE);
+				jSonDataFinalObj.put("flag", "N");
 			}
 		 /* }*/
 		} catch (Exception e) {
@@ -612,6 +655,7 @@ public static Boolean saveComputerDetailslist(Connection conn,InspectorInspectio
 						psmtdel.setString(1, General.checknull(reqobj.get("fac_id").toString()));
 						psmtdel.executeUpdate();
 	            	}
+	            	System.out.println("saveComputerDetailslist||"+psmt);
 					psmt.addBatch();
 			    }
 			 		//Save FacilityDetails
@@ -904,13 +948,16 @@ public static ArrayList<InspectorInspectionModel> getAffiliationDetails(String I
 			+" where af_reg_id='"+Inst_Id+"' and inspection_by='"+inspection_by+"' and inspection_type='Inspector' order by CREATED_DATE desc limit 1) as insp_remarks,(SELECT insp_recm FROM "
 			+" af_inspection_member_detail where af_reg_id='"+Inst_Id+"' and inspection_by='"+inspection_by+"' and inspection_type='Inspector' order by CREATED_DATE desc limit 1) as "
 			+" insp_recm,(SELECT inspection_id FROM af_inspection_member_detail where af_reg_id='"+Inst_Id+"' and inspection_by='"+inspection_by+"' and inspection_type='Inspector' order by "
-			+" CREATED_DATE desc limit 1) as inspection_id,(select concat(file_attachment_id,'_',file_name) from file_attachment where "
-			+" reference_id in (SELECT inspection_id FROM af_inspection_member_detail where af_reg_id='"+Inst_Id+"' and inspection_by='"+inspection_by+"' and inspection_type='Inspector' order "
-			+" by CREATED_DATE desc ) and table_name='af_inspection_member_detail' and file_type='inspection_file' order by CREATED desc limit 1) "
+			+" CREATED_DATE desc limit 1) as inspection_id,"
+			+ "(select concat(file_attachment_id,'_',file_name) from file_attachment where "
+			+" reference_id='"+Inst_Id+"' "
+			/*+ "in (SELECT inspection_id FROM af_inspection_member_detail where af_reg_id='"+Inst_Id+"' and inspection_by='"+inspection_by+"' and inspection_type='Inspector' order "
+			+" by CREATED_DATE desc ) "*/
+			+ "and table_name='af_inspection_member_detail' and file_type='inspection_file' order by CREATED desc limit 1) "
 			+" as memberfile from af_apply_for_affiliation mrt, af_request_type rt, af_manage_request_type_sub_type st, af_manage_fee_configration "
 			+" fc where mrt.request_id=rt.req_id and mrt.sub_request_id=st.MRT_ID and mrt.request_id=fc.request_type and "
 			+" mrt.sub_request_id=fc.sub_request_type and fc. man_fee_config_id=mrt.fee_config_id and fc.req_type='AC' and mrt.AFF_ID='"+Inst_Id+"' "; 
-			System.out.println("getAffiliationDetails ||"+qry);
+			//System.out.println("getAffiliationDetails ||"+qry);
 		psmt = conn.prepareStatement(qry);
 		rst= psmt.executeQuery();
 		while(rst.next()){
@@ -931,7 +978,6 @@ public static ArrayList<InspectorInspectionModel> getAffiliationDetails(String I
 				if (jsn.get("id").equals(rst.getString("course_name"))) {
 					afm.setCourse_name(General.checknull(jsn.get("desc").toString()));
 				}
-				
 			}
 			afm.setSession(General.checknull(rst.getString("ssn")));
 			
@@ -1036,10 +1082,10 @@ public static ArrayList<InspectorInspectionModel> getAffIntakeDetail(String Inst
 public static boolean saveDoc(String machine,String inst_id, String id, String userid, Connection conn, FileItem fileItem){		
 	java.io.File file;
 	try{
-		String attachid=saveFileattachment(machine, fileItem, id, userid, conn);
+		String attachid=saveFileattachment(machine, fileItem, inst_id, userid, conn);
 		
 		if(!attachid.equals("")){
-			String directoryName = ReadProps.getkeyValue("document.path", "sitsResource")+"INSPECTOR_INSPECTION/"+inst_id+"/"+id+"/";
+			String directoryName = ReadProps.getkeyValue("document.path", "sitsResource")+"INSPECTOR_INSPECTION/"+inst_id+"/"/*+id+"/"*/;
 			File directory = new File(directoryName);
 			if (!directory.isDirectory()){
 				directory.mkdirs();
@@ -1739,5 +1785,83 @@ public static JSONArray getUplData(String id) {
 		}
 		return model;
 	}
+	
+	 public static JSONArray viewMembersDetails(String Inst_Id,String session_code,String employee_id) {
+		        final JSONArray arr = new JSONArray();
+		        String cSql = "";
+		        Connection conn = null;
+		        PreparedStatement pstmt = null;
+		        ResultSet rst = null;
+		        try {
+		            conn = DBConnection.getConnection();
+		            cSql = "select inspection_id,session,af_reg_id,inspection_by,insp_remarks,insp_recm,isfinalsubmited,"
+		            		+ "inspection_type,emp_type,member_name,department,designation,contant_no,is_member_head FROM "
+		            		+ "af_inspection_member_detail WHERE af_reg_id='"+Inst_Id+"' and session='"+session_code+"' and inspection_type in "
+		            		+ "('Inspector','Member') and inspection_by='"+employee_id+"' ";
+		            pstmt = conn.prepareStatement(cSql);
+		            System.out.println("viewMembersDetails:: " + pstmt);
+		            rst = pstmt.executeQuery();
+		            if (rst.next()) {
+		                do {
+		                    final JSONObject obj = new JSONObject();
+		                    obj.put((Object)"inspection_id", (Object)General.checknull(rst.getString("inspection_id")));
+		                    obj.put((Object)"session", (Object)General.checknull(rst.getString("session")));
+		                    obj.put((Object)"af_reg_id", (Object)General.checknull(rst.getString("af_reg_id")));
+		                    obj.put((Object)"inspection_by", (Object)General.checknull(rst.getString("inspection_by")));
+		                    obj.put((Object)"insp_remarks", (Object)General.checknull(rst.getString("insp_remarks")));
+		                    obj.put((Object)"insp_recm", (Object)General.checknull(rst.getString("insp_recm")));
+		                    obj.put((Object)"isfinalsubmited", (Object)General.checknull(rst.getString("isfinalsubmited")));
+		                    obj.put((Object)"inspection_type", (Object)General.checknull(rst.getString("inspection_type")));
+		                    obj.put((Object)"emp_type", (Object)General.checknull(rst.getString("emp_type")));
+		                    obj.put((Object)"member_name", (Object)General.checknull(rst.getString("member_name")));
+		                    obj.put((Object)"department", (Object)General.checknull(rst.getString("department")));
+		                    obj.put((Object)"designation", (Object)General.checknull(rst.getString("designation")));
+		                    obj.put((Object)"contant_no", (Object)General.checknull(rst.getString("contant_no")));
+		                    obj.put((Object)"is_member_head", (Object)General.checknull(rst.getString("is_member_head")));
+		                    arr.add((Object)obj);
+		                    
+		                    
+		                } while (rst.next());
+		            }
+		        }
+		        
+		        catch (Exception e) {
+		            System.out.println("Error in InspectorInspectionManager[viewMembersDetails] : " + e.getMessage());
+		            l.fatal(Logging.logException("InspectorInspectionManager [viewMembersDetails]", e.toString()));
+		            try {
+		                if (pstmt != null) {
+		                    pstmt = null;
+		                }
+		                if (rst != null) {
+		                    rst = null;
+		                }
+		                if (conn != null) {
+		                    conn.close();
+		                }
+		            }
+		            catch (Exception e2) {
+		                e2.printStackTrace();
+		            }
+		            return arr;
+		        }
+		        finally {
+		            try {
+		                if (pstmt != null) {
+		                    pstmt = null;
+		                }
+		                if (rst != null) {
+		                    rst = null;
+		                }
+		                if (conn != null) {
+		                    conn.close();
+		                }
+		            }
+		            catch (Exception e2) {
+		                e2.printStackTrace();
+		            }
+		            
+		        }
+		        return arr;
+		    }
 	
 }

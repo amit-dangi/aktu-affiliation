@@ -60,7 +60,7 @@ public class InspectionByRegistrarManager {
 	 			
 	 			conn = DBConnection.getConnection();
 	 			
- 			query="select distinct aff.session,concat(crm.PROP_INST_NAME,' (',crm.clg_code,')') as PROP_INST_NAME,contact,"
+ 			query="select distinct aff.session,aff.request_id,crm.DISTRICT,concat(crm.PROP_INST_NAME,' (',crm.clg_code,')') as PROP_INST_NAME,contact,"
 				+ "email,crm.AF_REG_ID,REG_NO,date_format(review_date,'%d/%m/%Y') as review_date,panel_code,review_remarks,"
 				+ "aimd.isfinalsubmited as consolidate_finalsubmit,aimd.insp_remarks as consolidate_insp_remarks,"
 				+ "aimd.insp_recm as consolidate_insp_recm, aimd.inspection_by as consolidate_review_by,(select panel_name "
@@ -68,11 +68,12 @@ public class InspectionByRegistrarManager {
 				+ "registrar_inspection_id,imd.inspection_by as registrar_id,imd.insp_remarks as registrar_remarks, "
 				+ "imd.insp_recm as registrar_recm,imd.isfinalsubmited as registrar_finalsubmit,imd.isfinal_acknowledge ,"
 				+ "imd2.inspection_id as governbody_id,imd2.insp_remarks as governbody_remarks, imd2.insp_recm as governbody_recm,"
-				+ "imd2.isfinalsubmited as governbody_finalsubmit from af_inspection_member_detail aimd,af_clg_reg_mast crm,"
-				+ "af_apply_for_affiliation aff left join af_inspection_member_detail imd on  aff.session=imd.session and "
+				+ "imd2.isfinalsubmited as governbody_finalsubmit from af_clg_reg_mast crm,af_apply_for_affiliation aff "
+				+ "left join af_inspection_member_detail aimd on aff.session=aimd.session and aimd.inspection_type='Inspector' "
+				+ "and aff.AFF_ID=aimd.af_reg_id left join af_inspection_member_detail imd on aff.session=imd.session and "
 				+ "imd.inspection_type='Registrar' and aff.AFF_ID=imd.af_reg_id left join af_inspection_member_detail imd2  "
 				+ "on aff.session=imd2.session and imd2.inspection_type='GovernBody' and aff.AFF_ID=imd2.af_reg_id where "
-				+ "crm.AF_REG_ID=aff.AFF_ID and crm.AF_REG_ID=aimd.af_reg_id and aimd.inspection_type='Inspector' and "
+				+ "crm.AF_REG_ID=aff.AFF_ID  and "
 				+ "is_final_submit_app='Y' and aff.session='"+General.checknull(raModel.getSession_id())+"' ";
 	        			
     			if(!General.checknull(raModel.getInst_name()).trim().equals("")){
@@ -85,9 +86,20 @@ public class InspectionByRegistrarManager {
 	        		query += "and email='"+General.checknull(raModel.getEmail_id())+"' ";
 				}
     			
-    			if(!(General.checknull(raModel.getXFROMDATE()).trim().equals("") && General.checknull(raModel.getXTODATE()).trim().equals("")) ){
-	        		query += "and date_format(review_date,'%d/%m/%Y') between '"+General.checknull(raModel.getXTODATE())+"' and '"+General.checknull(raModel.getXFROMDATE())+"' ";
+    			if(!General.checknull(raModel.getEmail_id()).trim().equals("")){
+	        		query += "and email='"+General.checknull(raModel.getEmail_id())+"' ";
 				}
+    			
+    			if(!General.checknull(raModel.getDistrict()).trim().equals("")){
+	        		query += "and DISTRICT='"+General.checknull(raModel.getDistrict())+"' ";
+				}
+    			if(!General.checknull(raModel.getRequest_name()).trim().equals("")){
+	        		query += "and request_id='"+General.checknull(raModel.getRequest_name())+"' ";
+				}
+    			
+    			/*if(!(General.checknull(raModel.getXFROMDATE()).trim().equals("") && General.checknull(raModel.getXTODATE()).trim().equals("")) ){
+	        		query += "and date_format(review_date,'%d/%m/%Y') between '"+General.checknull(raModel.getXTODATE())+"' and '"+General.checknull(raModel.getXFROMDATE())+"' ";
+				}*/
     			query += " order by is_final_submit_app_dt asc";		 
 	 			psmt = conn.prepareStatement(query);
 	 			System.out.println("getApplicationDetails registrar psmt||"+psmt);

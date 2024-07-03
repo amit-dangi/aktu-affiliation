@@ -8,6 +8,7 @@ import java.sql.PreparedStatement;
 import java.sql.Connection;
 import com.sits.general.Logging;
 import com.sits.general.General;
+import com.sits.commonApi.commonAPI;
 import com.sits.conn.DBConnection;
 import org.apache.log4j.Logger;
 
@@ -78,9 +79,9 @@ public class InspectionApprovalPanelManager
                 String qry = "";
                 i = 0;
                 pstmt = null;
-                qry = "INSERT INTO af_approv_pannel_detail (panel_id,member_type,department,designation,email_id,contant_no,is_convenor,issActive,CREATED_BY, CREATED_DATE, CREATED_MACHINE,emp_type) values(?,?,?,?,?,?,?,?,?,now(),?,?) ";
+                qry = "INSERT INTO af_approv_pannel_detail (panel_id,member_type,department,designation,email_id,contant_no,is_convenor,issActive,CREATED_BY, CREATED_DATE, CREATED_MACHINE,emp_type,district) values(?,?,?,?,?,?,?,?,?,now(),?,?,?) ";
                 pstmt2 = conn.prepareStatement(qry);
-                updetsql = " update af_approv_pannel_detail set member_type=?,department=?,designation=?,email_id=?,contant_no=?,is_convenor=?,issActive=?, UPDATED_BY=?,UPDATED_DATE=now(),UPDATED_MACHINE=?,emp_type=?  where Panel_det_id=?";
+                updetsql = " update af_approv_pannel_detail set member_type=?,department=?,designation=?,email_id=?,contant_no=?,is_convenor=?,issActive=?, UPDATED_BY=?,UPDATED_DATE=now(),UPDATED_MACHINE=?,emp_type=?,district=?  where Panel_det_id=?";
                 updetPstmt = conn.prepareStatement(updetsql);
                 for (int t = 0; t < al.size(); t++) {
                      InspectionApprovalPanelModel mdl = (InspectionApprovalPanelModel) al.get(t); 
@@ -102,6 +103,7 @@ public class InspectionApprovalPanelManager
                         pstmt2.setString(9, General.checknull(user_id.trim()));
                         pstmt2.setString(10, ip.trim());
                         pstmt2.setString(11, General.checknull(mdl.getEmp_type()));
+                        pstmt2.setString(12, General.checknull(mdl.getDistrict()));
                         pstmt2.addBatch();
                     }
                     else {
@@ -117,6 +119,7 @@ public class InspectionApprovalPanelManager
                         updetPstmt.setString(9, ip.trim());
                         updetPstmt.setString(10, General.checknull(mdl.getEmp_type()));
                         updetPstmt.setString(11, General.checknull(mdl.getPanel_det_id()));
+                        updetPstmt.setString(12, General.checknull(mdl.getDistrict()));
                         updetPstmt.addBatch();
                     }
                 }
@@ -486,10 +489,9 @@ public class InspectionApprovalPanelManager
         ResultSet rst = null;
         try {
             conn = DBConnection.getConnection();
-            cSql = "select emp_type,Panel_det_id,member_type,department,designation,email_id,contant_no,is_convenor,issActive FROM af_approv_pannel_detail WHERE Panel_id=? ";
+            cSql = "select emp_type,Panel_det_id,member_type,department,designation,district,email_id,contant_no,is_convenor,issActive FROM af_approv_pannel_detail WHERE Panel_id=? ";
             pstmt = conn.prepareStatement(cSql);
             pstmt.setString(1, panel_id.toUpperCase().trim());
-          //  System.out.println("detail:: " + pstmt);
             rst = pstmt.executeQuery();
             if (rst.next()) {
                 do {
@@ -503,8 +505,9 @@ public class InspectionApprovalPanelManager
                     obj.put((Object)"contant_no", (Object)General.checknull(rst.getString("contant_no")));
                     obj.put((Object)"is_convenor", (Object)General.checknull(rst.getString("is_convenor")));
                     obj.put((Object)"issActive", (Object)General.checknull(rst.getString("issActive")));
+                    obj.put("district",General.checknull(rst.getString("district")));
                     arr.add((Object)obj);
-                    
+                    System.out.println("arr||"+arr.toJSONString());
                     
                 } while (rst.next());
             }

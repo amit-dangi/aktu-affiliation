@@ -4,7 +4,7 @@ $(document).ready(function(){
 });   
 
 	//var state = $("#state").val();
-	getDist('ST0001','DT0001','XDIST_1');	
+	getDist('ST0001','DT0053','district');	
 	
 $("#X_BTNRESET").click(function(){
 		document.getElementById("frmAffliD").reset();
@@ -97,7 +97,7 @@ $("#addQuotation").click(function(){
 			    +'<td style="text-align:center; width:10%;">'
 			    +'<select class="form-control" id="XMTYPE_'+index+'" name="XMTYPE_'+index+'" onchange="getEmpbymember(this.value,'+index+');">'
 			    +'<option value="">Select Member Type</option>'
-			    /*+'<option value="I">District level as nominated by district magistrate (ACO/ADM Nominated by DM)</option>'*/
+			    +'<option value="I">District level as nominated by district magistrate (ACO/ADM Nominated by DM)</option>'
 			    +'<option value="E">Professor/Associate Professor nominated by VC</option>'
 			    +'</select>'
 			    +'</td>'
@@ -114,9 +114,8 @@ $("#addQuotation").click(function(){
 				+' <select class="form-control " id="XPOST_'+index+'" name="XPOST_'+index+'" disabled>'
 				+' <option value="">Select Post Type </option></td>'
 				+'<td style="text-align:center; width:8%;">'
-				+'<select class="form-control" id="XDIST_'+index+'" name="XDIST_'+index+'">'
-				+'<option value="">Select District Name</option>'
-				+'</select></td>'
+				+'<input type="text" class="form-control" id="XDIST_'+index+'" name="XDIST_'+index+'"  placeholder="Select District">'
+				+'</td>'
 				+' <td style="text-align:center; width:10%;">'
 				+' <input type="text" class="form-control" id="XEMAIL_'+index+'" name="XEMAIL_'+index+'" value=""  maxlength="29" onblur="validEmail(this);" placeholder="Enter the Email Id  " disabled>'
 				+' <td style="text-align:right; width:8%;">'
@@ -125,7 +124,7 @@ $("#addQuotation").click(function(){
 				+'<input type="checkbox" class="checkboxcon" id="XCONV_'+index+'" name="XCONV_'+index+'" '+des+' onclick="checkfn('+index+');"></td>'
 				+'<td style="text-align:right; width:10%;">'
 				+' <select class="form-control " id="XACT_'+index+'" name="XACT_'+index+'">'
-				/*+' <option value="">Select</option>'*/
+				+' <option value="">Select</option>'
 				+'<option value="Y">Yes</option>'
 			    +'<option value="N"> No </option>'
 			    +'</select></td>'
@@ -134,15 +133,9 @@ $("#addQuotation").click(function(){
 				+' <input type="hidden" ><span id=""><i class="fa fa-trash" >&nbsp;Delete</i></span>';
 				+'</td>'
 				
-				+'</tr>';
-				if(index==4){
-				alert("Only 3 Members allowed.");	
-				}else{
+				+'</tr>';		
 			$('.Quotation').append(cols);
 			$("#count").val(index);
-			getDist('ST0001','','XDIST_'+index);
-				}
-				
 			//memberNamedropdown('',index);
 		/*	getEmployee('','XNAME_'+index);
 			getDeprtment('','XDEPARTMT_'+index);
@@ -153,15 +146,19 @@ $("#addQuotation").click(function(){
 var fstatus=$("#fstatus").val();
 if(fstatus=='E'){ 
 	  var jsondata=$("#jsonddata").val();  
-	  var obj = jQuery.parseJSON(jsondata); 
+	  var obj = jQuery.parseJSON(jsondata);
+	  var m1="Dr. D. P. Singh";
+	  var m2="Dr. Amit Kumar";
+	  var m3="Dr. Ajay Kumar";
+	  
 	  $.each(obj, function (index, value) {
+		  var m=(index=='1'?m1:index=='2'?m2:m3);
 			 des="";
 			  index=index+1;
 			  if(index==1){
 				  des="disabled";
 			  }
-			   
-		  var district=value["district"].toString();
+			  
 		  var emp_type=value["emp_type"].toString();
 		  var Panel_det_id=value["Panel_det_id"].toString();
 		  var member_type=value["member_type"].toString();
@@ -182,37 +179,28 @@ if(fstatus=='E'){
 		  var sel1="";
 		  var newRow = $("<tr>");	 
 		  var cols = '<tr>'
-			  cols +='<td style="text-align:center; width:3%;" id="srn_'+index+'">'+index+'</td>'
-			    cols +='<td style="text-align:center; width:10%;">'
-		    	cols +='<select class="form-control" id="XMTYPE_'+index+'" name="XMTYPE_'+index+'" onchange="getEmpbymember('+"'"+''+emp_type+''+"'"+','+index+','+"'"+''+member_type+''+"'"+');" disabled>'
+			  cols +='<td style="text-align:center; width:1%;" id="srn_'+index+'">'+index+'</td>'
+			    cols +='<td style="text-align:center; width:28%; font-size:12;">'
+		    	cols +='<select class="form-control" id="XMTYPE_'+index+'" name="XMTYPE_'+index+'"  onchange="getEmpbymember('+"'"+''+emp_type+''+"'"+','+index+','+"'"+''+member_type+''+"'"+');" disabled>'
 		    	cols +='<option value="">Select Member Type</option>'
-	    		cols +='<option value="I" '+(emp_type=="I"?"selected":"")+'>District level as nominated by district magistrate (ACO/ADM Nominated by DM)</option>'
-				cols +='<option value="E" '+(emp_type=="E"?"selected":"")+'>Professor/Associate Professor nominated by VC</option>'
+	    		cols +='<option value="I" '+(index=="1"?"selected":"")+'>District level as nominated by district magistrate (ACO/ADM Nominated by DM)</option>'
+				cols +='<option value="E" '+(index!="1"?"selected":"")+'>Professor/Associate Professor nominated by VC</option>'
 	    		cols +='</select></td>'
-	    		cols +=' <td style="text-align:center; width:10%;">'
-				+' <select class="form-control" id="XNAME_'+index+'" name="XNAME_'+index+'" onchange="getExternalEmpDetails('+"'"+''+member_type+''+"'"+','+index+')" disabled>'
-				+' <option value="">Select Member Name</option>'
-				+' </select></td>'
-				+'<option value=""> Select Member Type</option>'
-				+' <td style="text-align:center; width:10%;">'
-				+' <select class="form-control" id="XDEPARTMT_'+index+'" name="XDEPARTMT_'+index+'" disabled>'
-				+' <option value="">Select Department </option>'
-				cols +=' </select></td>'
-				+' <td style="text-align:center; width:10%;"> '
-				+' <select class="form-control " id="XPOST_'+index+'" name="XPOST_'+index+'" disabled>'
-				+' <option value="">Select Post Type </option>'
-				cols +=' </select></td>'
-				+'<td style="text-align:center; width:8%;">'
-				+'<select class="form-control" id="XDIST_'+index+'" name="XDIST_'+index+'">'
-				+'<option value="">Select District Name</option>'
-				+'</select></td>'
-				cols +=' <td style="text-align:center; width:10%;">'
-				cols +=' <input type="text" class="form-control" id="XEMAIL_'+index+'" name="XEMAIL_'+index+'"   value="'+email_id+'"  maxlength="29" onblur="validEmail(this);" placeholder="Enter the Email Id" disabled>'
-				+' <td style="text-align:right; width:8%;">'
+	    			+'<td style="text-align:center; width:8%;">'
+					+'<input type="text" class="form-control" id="XNAME_'+index+'" name="XNAME_'+index+'"  value="'+m+'">'
+					+'</td>'
+				+' <td style="text-align:center; width:5%;">'
+				+'<input type="text" class="form-control" id="XDEPARTMT_'+index+'" name="XDEPARTMT_'+index+'"  value="Test_'+index+'">'
+				+'</td>'
+				+' <td style="text-align:center; width:5%;">'
+				+'<input type="text" class="form-control" id="XPOST_'+index+'" name="XPOST_'+index+'"  value="Test_'+index+'">'
+				+'</td>'
+				cols +=' <td style="text-align:center; width:5%;">'
 				cols +=' <input type="text" class="form-control" id="XCONTACT_'+index+'" name="XCONTACT_'+index+'""  value="'+contant_no+'" maxlength="10" onkeypress="return isNumberKeys(event);" placeholder="Enter Phone No" disabled>'
-				+' <td style="text-align:center; width:10%;">'
-				cols +='<input type="checkbox" class="checkboxcon"   id="XCONV_'+index+'" name="XCONV_'+index+'" '+check+' onclick="checkfn('+index+');"></td>'
-				+'<td style="text-align:right; width:10%;">'
+				+'</td>'
+				+' <td style="text-align:center; width:3%;">'
+				cols +='<input type="checkbox" class="checkboxcon"   id="XCONV_'+index+'" name="XCONV_'+index+'" '+(index=="1"?"checked":"disabled")+' onclick="checkfn('+index+');"></td>'
+				/*+'<td style="text-align:right; width:10%;">'
 				+' <select class="form-control " id="XACT_'+index+'"    name="XACT_'+index+'" value="'+check+'" >'
 				+' <option value="">Select</option>'
 				if(issActive=='Y'){
@@ -224,11 +212,11 @@ if(fstatus=='E'){
 				cols +='<option value="N" '+sel1+'>No </option>'
 				cols +='</select>'
 			    +' <input type="hidden" id="Panel_det_id_'+index+'" value="'+Panel_det_id+'"/>'				
-			    +' </td>'
+			    +' </td>'*/
 			    
-			    +'<td class="colr-red-p text-center" style=" width:5%; color:red;cursor: pointer;" id="Panel_det_id_'+index+'" onclick="deleteDetailsdata('+Panel_det_id+','+index+',this);">'
+			  /*+'<td class="colr-red-p text-center" style=" width:5%; color:red;cursor: pointer;" id="Panel_det_id_'+index+'" onclick="deleteDetailsdata('+Panel_det_id+','+index+',this);">'
 				+' <input type="hidden" ><span id=""><i class="fa fa-trash" >&nbsp;Delete</i></span>';
-				+'</td>'
+				+'</td>'*/
 				+'</tr>';		
 				$('.Quotation').append(cols);
 				$("#count").val(index);
@@ -236,7 +224,6 @@ if(fstatus=='E'){
 				//getEmployee(member_type,'XNAME_'+index);
 	       		//getDeprtment(department,'XDEPARTMT_'+index);
 	       		//getDesignation(designation,'XPOST_'+index);
-				getDist('ST0001',district,'XDIST_'+index);	
 				getEmpbymember(emp_type,index,member_type);
 				getExternalEmpDetails(member_type,index);
 		}); 
@@ -305,12 +292,6 @@ function executeSaveRecord() {
 					$("#XPOST_"+i).focus();
 					return false;
 				}
-				if (($("#XDIST_"+i).val() ==""  || $("#XDIST_"+i).val()  == null) && $("#XDIST_"+i).val()!=undefined){
-					showerr($("#XDIST_"+i)[0], "District is required", "block");
-					$("#XDIST_"+i).focus();
-					return false;
-				}
-				
 				if (($("#XEMAIL_"+i).val() ==""  || $("#XEMAIL_"+i).val()  == null) && $("#XEMAIL_"+i).val()!=undefined){
 					showerr($("#XEMAIL_"+i)[0], "Email Id is required", "block");
 					$("#XEMAIL_"+i).focus();
@@ -363,9 +344,7 @@ function executeSaveRecord() {
 						"email_id" 				: $("#XEMAIL_" + i).val(),
 						"contact_no" 	        : $("#XCONTACT_" + i).val(),
 						"is_convenor" 		    : is_con,
-						"iss_active" 	        : $("#XACT_" + i).val(),
-						"district" 	        	: $("#XDIST_" + i).val()
-						
+						"iss_active" 	        : $("#XACT_" + i).val()
 					});
 			}
 			 
@@ -567,11 +546,11 @@ function deleteDetailsdata(id,index,panel_id){
 	}
 
  function getEmpbymember(emp_type,index,emp_id){
-	/* if(emp_type=='I'){
+	 if(emp_type=='I'){
 	 getEmployee(emp_id,'XNAME_'+index);
-	 }else{*/
+	 }else{
 	 getExternalEmployee(emp_id,'XNAME_'+index);	 
-	/* }*/
+	 }
  }
  
  

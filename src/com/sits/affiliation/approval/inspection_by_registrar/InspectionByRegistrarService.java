@@ -87,6 +87,8 @@ public class InspectionByRegistrarService extends HttpServlet {
 			raModel.setEmail_id(General.checknull(request.getParameter("email_id")));
 			raModel.setXTODATE(General.checknull(request.getParameter("XTODATE")));
 			raModel.setXFROMDATE(General.checknull(request.getParameter("XFROMDATE")));
+			raModel.setDistrict(General.checknull(request.getParameter("district")));
+			raModel.setRequest_name(General.checknull(request.getParameter("request_name")));
 			raModel.setPanel_member(employee_id);
 		 
 			finalResult = InspectionByRegistrarManager.getApplicationDetails(raModel);

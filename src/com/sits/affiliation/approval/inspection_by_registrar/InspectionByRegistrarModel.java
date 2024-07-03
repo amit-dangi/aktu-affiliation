@@ -26,6 +26,8 @@ public class InspectionByRegistrarModel extends Common{
 	private String inspection_id;
 	private String reg_no;
 	private String reg_name;
+	private String district;
+	private String request_name;
 	
 	
 	public String getSession_id() {
@@ -140,6 +142,18 @@ public class InspectionByRegistrarModel extends Common{
 				+ ", recommendation=" + recommendation + ", actiontype=" + actiontype + ", panel_member=" + panel_member
 				+ ", inspection_type=" + inspection_type + ", inspection_by=" + inspection_by + ", inspection_id="
 				+ inspection_id + "]";
+	}
+	public String getDistrict() {
+		return district;
+	}
+	public void setDistrict(String district) {
+		this.district = district;
+	}
+	public String getRequest_name() {
+		return request_name;
+	}
+	public void setRequest_name(String request_name) {
+		this.request_name = request_name;
 	}
 	
 	

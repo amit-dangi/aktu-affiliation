@@ -8,6 +8,12 @@ $(document).ready(function(){
 	$("#btnReset, #btnReset1, #btnReset2").click(function(){
 		location.reload();
 	});
+	$("#Insp_recm_1").change(function(){
+		var selectedvalue = $(this).find('option:selected').val();
+		if(selectedvalue!='')
+			showRemarks(selectedvalue,'1');
+	});
+	
 	getAcademicSession();
 });
 
@@ -49,8 +55,8 @@ function getApplicationDetail(){
 				
 				if (typeof response.Applicationlist!= 'undefined' && response.Applicationlist.length > 0) {
 				$('#stable').html("");
-			//	console.log("response");
-			//	console.log(response.Applicationlist);
+			console.log("response");
+			console.log(response.Applicationlist);
 				 var index=0;
 					$.each(response.Applicationlist, function (key, val) {
 						$("#searchTable").show();
@@ -69,7 +75,7 @@ function getApplicationDetail(){
 	                    var is_convinor		= val.is_convinor;
 	                    var convinor_id		= val.convinor_id;
 	                    
-	                    if(is_pannel_member=='Y' || $('#user_status').val()=='A'){
+	                    if(is_pannel_member=='Y' /*|| $('#user_status').val()=='A'*/){
 	                    	index=index+1;
 	                    var cols ='<tr>'
 	                    	+'<td style="text-align:center; width:3%;">'+index+'</td>'
@@ -78,17 +84,17 @@ function getApplicationDetail(){
 	                    	+'<td style="text-align:center; width:8%;">'+REG_FOR_NAME+'</td>'
 	                    	+'<td style="text-align:center; width:8%;">'+contact+'</td>'
 	                    	+'<td style="text-align:center; width:8%;">'+email+'</td>'
-	                    	+'<td style="text-align:center; width:8%;"><a style="color:green;cursor: pointer;" id="inspectionhref" onclick=openInspection('+"'"+''+AF_REG_ID+''+"'"+','+"'"+''+session_id+''+"'"+','+"'"+''+isfinalsubmited+''+"'"+','+"'"+''+is_pannel_member+''+"'"+','+"'"+'N'+"'"+',\''+is_convinor+'\',\''+convinor_id+'\')>Click here to View</a></td>'
+	                    	+'<td style="text-align:center; width:8%;"><a style="color:green;cursor: pointer;" id="inspectionhref" onclick=openInspection('+"'"+''+AF_REG_ID+''+"'"+','+"'"+''+session_id+''+"'"+','+"'"+''+isfinalsubmited+''+"'"+','+"'"+''+is_pannel_member+''+"'"+','+"'"+'N'+"'"+',\''+is_convinor+'\',\''+convinor_id+'\')>Start Inspection & View Application Form</a></td>'
 	                    	if(isfinalsubmited=='Y'){
 	                    		cols +='<td style="text-align:center; width:8%; color: #2c5e2c;"><b>Submitted</b></td>'	
 	                    	}else{
 	                    		if(is_convinor=='Y'){
 	                    		cols +='<td style="text-align:center; width:8%;"><button type="button" class="btn btn-view1" style="background-color:#2c5e2c !important; color: #ffffff;" onclick=openInspection('+"'"+''+AF_REG_ID+''+"'"+','+"'"+''+session_id+''+"'"+','+"'"+''+isfinalsubmited+''+"'"+','+"'"+''+is_pannel_member+''+"'"+','+"'"+'Y'+"'"+',\''+is_convinor+'\',\''+convinor_id+'\')>Submit</button></td>'
 	                    		}else{
-                    			cols +='<td style="text-align:center; width:8%; color: #a94442f7;"><b>Only Panel Convenor Allowed</b></td>'	
+                    			cols +='<td style="text-align:center; width:8%; color: #a94442f7;"><b>Only Panel Head Allowed</b></td>'	
 	                    		}
                     		}
-	                    	cols +='<td style="text-align:center; width:8%;"><button type="button" class="btn btn-view" id="printMe1" onclick="downloadJasperReport('+"'"+''+AF_REG_ID+''+"'"+');">Print</button></td>'
+	                    	cols +='<td style="text-align:center; width:8%;"><button type="button" class="btn btn-view" id="printMe1" onclick="downloadJasperReport('+"'"+''+AF_REG_ID+''+"'"+',\''+convinor_id+'\');">Print</button></td>'
 	                    	+'</td>'
 	                    	+'</tr>'
 	                    }
@@ -141,9 +147,10 @@ function save(savetype,isfinalsubmited,Inst_Id){
 			var exp_index = "1";
 			var is_upload_file="N";
 			var insp_remarks=$('#insp_remarks').val();
-			var insp_recm=$('#insp_recm').val();
+			//var insp_recm=$('#insp_recm').val();
 			var session_id=$("#session_id").val();
 			var inspection_id=$("#inspection_id").val();
+			var is_convinor=$("#is_convinor").val();
 			//alert("inspection_id||"+inspection_id);
 			//return;
 			try{
@@ -151,15 +158,51 @@ function save(savetype,isfinalsubmited,Inst_Id){
 				$('#attachment1').focus();	
 				showerr($("#attachment1")[0], "Upload Printed Report with Member Signature is Required while final submit.","block");
 				return false;	
-			}else if(insp_remarks==""){
+					}/*else if(insp_remarks==""){
 				$('#insp_remarks').focus();	
 				showerr($("#insp_remarks")[0], "Kindly enter the remarks.","block");
 				return false;
-				}
-			else if(insp_recm==""){
+				}*/
+		/*	else if(insp_recm==""){
 				$('#insp_recm').focus();	
 				showerr($("#insp_recm")[0], "Kindly enter the Recommendation.","block");
 				return false;
+				}*/
+				var membersrno = $("#membersrno").val();
+				for(var i = 0; i < membersrno; i++){
+					if(is_convinor=='Y'){
+					 if($("#XNAME_"+ i).val()==""){
+							$('#XNAME_'+i).focus();	
+							showerr($("#XNAME_"+ i)[0], "Member Name is Required.","block");
+							return false;
+							}
+					 if($("#XDEPARTMT_"+ i).val()==""){
+							$("#XDEPARTMT_"+ i).focus();	
+							showerr($("#XDEPARTMT_"+ i)[0], "Department is Required.","block");
+							return false;
+							}
+					 if($("#XPOST_"+ i).val()==""){
+							$("#XPOST_"+ i).focus();	
+							showerr($("#XPOST_"+ i)[0], "Designation is Required.","block");
+							return false;
+							}
+					 if($("#XCONTACT_"+ i).val()==""){
+							$("#XCONTACT_"+ i).focus();	
+							showerr($("#XCONTACT_"+ i)[0], "Contact No. is Required.","block");
+							return false;
+							}
+					}
+					if($("#Insp_recm_"+ (i+1)).val()=="" ){
+						$("#Insp_recm_"+ (i+1)).focus();	
+						showerr($("#Insp_recm_"+ (i+1))[0], $("#XNAME_"+i).val()+"Inspection Member Recommendation is Required.","block");
+						return false;
+						}
+					
+					 if($("#Insp_recm_"+ (i+1)).val()=="Not_Recommended" && $("#Insp_remarks_"+ (i+1)).val()==""){
+							$("#Insp_remarks_"+ (i+1)).focus();	
+							showerr($("#Insp_remarks_"+ (i+1))[0], $("#XNAME_"+i).val()+" Not Recommended Reason is Required.","block");
+							return false;
+							}
 				}
 			}catch(e){
 				alert("ERROR :"+e);
@@ -172,9 +215,9 @@ function save(savetype,isfinalsubmited,Inst_Id){
 					var ext = $("#attachment"+i).val().split('.').pop().toLowerCase();
 					
 					if(ext !=""){
-						if($.inArray(ext, ['pdf','png','jpg','jpeg','doc','docx']) == -1) {						
+						if($.inArray(ext, ['pdf']) == -1) {						
 							$('#attachment'+i).focus();
-							alert("Note: Only .pdf, .jpg, .png, .doc & doc files will be allowed for uploading.!");
+							alert("Note: Only .pdf files will be allowed for uploading.!");
 							return false;
 						}
 					}
@@ -312,10 +355,29 @@ function save(savetype,isfinalsubmited,Inst_Id){
 			}
 			}
 			
-			var jsonObject={"session_id":session_id,"Inst_Id":Inst_Id,"insp_remarks":insp_remarks,"insp_recm":insp_recm,"isfinalsubmited":isfinalsubmited,
+			//Members Details  
+			var membersDetails = [];
+			var membersrno = $("#membersrno").val();
+			for(var i = 0; i < membersrno; i++){debugger;
+				if ($("#Insp_recm_" +(i+1)).val() != "" && $("#Insp_recm_" + (i+1)).val() != undefined) {
+					var arr = {
+							XMTYPE   	: $("#XMTYPE_"+ i).val(), 
+							XNAME		: $("#XNAME_"+i).val(),
+							XDEPARTMT 	: $("#XDEPARTMT_"+i).val(),
+							XPOST		: $("#XPOST_"+i).val(),
+							XCONTACT	: $("#XCONTACT_"+i).val(),
+							XCONV 		: $("#XCONV_"+i).is(":checked")?"Y":"N",
+							Insp_recm 	: $("#Insp_recm_"+(i+1)).val(),
+							insp_remarks: $("#Insp_remarks_"+(i+1)).val(),
+							}
+					membersDetails.push(arr);
+				}
+				}
+			
+			var jsonObject={"session_id":session_id,"Inst_Id":Inst_Id,"is_convinor":is_convinor,/*"insp_remarks":insp_remarks,"insp_recm":insp_recm,*/"isfinalsubmited":isfinalsubmited,
 							"computerDetails":computerDetails,"facilityDetails":facilityDetails,"administrativeDetails":administrativeDetails,
 							"amenitiesDetails":amenitiesDetails,"InfraDetails":InfraDetails,"facultyDetails":facultyDetails,
-							"questionnaireDetails":questionnaireDetails,"inspection_id":inspection_id};
+							"questionnaireDetails":questionnaireDetails,"membersDetails":membersDetails,"inspection_id":inspection_id};
 				console.log("inspector-inspection-detail Save Json Object");
 				jsonobj=JSON.stringify(jsonObject);
 				console.log(jsonobj);
@@ -338,11 +400,11 @@ function save(savetype,isfinalsubmited,Inst_Id){
 							if(isfinalsubmited!="Y"){
 							setTimeout(function() {
 								location.reload();
-							}, 4000);
+							}, 2000);
 							}else{
 								setTimeout(function () {
-									redirect(inspector_inspection_detail_e.jsp);
-								}, 4000);
+									parent.location.reload();
+								}, 2000);
 							}
 						
 					}
@@ -429,4 +491,70 @@ function callModalForCourse(id, mid,obj){
 	 $('#reportDiologPay').modal({backdrop: 'static', keyboard: false},'show');
 	 $('#showframePay').html("");
 	 $('#showframePay').append('<iframe class="embed-responsive-item" onload="resizeIframe(this)" name="1_Report" id="1_Report" width="100%;" height="200x" src="inspector_inspection_detail_subrequest_model.jsp?id='+id+'&mid='+mid+'&obj='+obj+'&Inst_Id='+Inst_Id+' " frameBorder="0" border="no" scrolling="no" style="border: none !important"></iframe>');
+}
+
+function showRemarks(selectedvalue,srno){
+	if(selectedvalue=="Not_Recommended")
+		{
+		 $('#insp_remarks_'+srno).show();
+		}else if (selectedvalue=="Recommended")
+			{
+			 $('#insp_remarks_'+srno).hide();
+			 $('#insp_remarks_'+srno).val("");
+			}
+		 else{
+			 $('#insp_remarks_1').hide();
+			 $('#insp_remarks_2').hide();
+			 $('#insp_remarks_3').hide();
+		}
+}
+
+function isNumberKeys(evt){
+    var charCode = (evt.which) ? evt.which : event.keyCode
+    if (charCode > 31 && (charCode < 48 || charCode > 57))
+        return false;
+    return true;
+}
+
+
+function allowNumberOrDecimal(object)
+{
+
+  var pattern = /^\d*\.?\d{0,4}$/;
+  var id=$(object).attr("id");
+  var mLength = $("#"+id).attr('maxlength');
+
+  var decimalValue=$("#"+id).val();
+  var totValidLength=mLength-6;
+
+  if(!pattern.test(decimalValue))
+  {
+     $("#"+id).focus();
+     showerr($("#"+id)[0],"Only Numeric with 5 decimal digit allowed","block");
+     //$("#"+id).val("0.00");
+    // $("#"+id).val("");
+     return false;
+  }
+   if(decimalValue.indexOf('.')== -1)
+   {
+	if(decimalValue.length>totValidLength)
+	 {
+		 $("#"+id).focus();
+	     showerr($("#"+id)[0],"Only "+totValidLength+" numeric digits are allowed"  ,"block");
+	     //$("#"+id).val("0.00");
+	    // $("#"+id).val("");
+	     return false;
+	 }
+   }else if(decimalValue.indexOf('.')>1){
+	   var arr=decimalValue.split(".");
+	   if(arr[0].length>totValidLength)
+		 {
+			 $("#"+id).focus();
+		     showerr($("#"+id)[0],"Only"+totValidLength+" numeric digits are allowed before decimal"  ,"block");
+		     //$("#"+id).val("0.00");
+		  //   $("#"+id).val("");
+		     return false;
+		 }
+
+   }
 }

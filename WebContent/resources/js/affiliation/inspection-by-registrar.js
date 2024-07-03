@@ -8,6 +8,7 @@ $(document).ready(function(){
 	});
 	// use for the get  AcademicSession  
 	getAcademicSession();
+	getDist('ST0001','','district');	
 });
 
 function getApplicationDetail(){ 
@@ -25,12 +26,14 @@ if (session_id == "") {
 	var email_id=$('#email_id').val();
 	var XTODATE=$('#XTODATE').val();
 	var XFROMDATE=$('#XFROMDATE').val();
+	var district=$('#district').val();
+	var request_name=$('#request_name').val();
 try {
 	$.ajax({
 		type: "POST",
 		url: "../InspectionByRegistrarService",
 		data:{"fstatus":"GETDETAILS", "session_id":session_id,"inst_name":inst_name,"mobile_no":mobile_no,
-			"email_id":email_id,"XTODATE":XTODATE,"XFROMDATE":XFROMDATE},
+			"email_id":email_id,"XTODATE":XTODATE,"XFROMDATE":XFROMDATE,"district":district,"request_name":request_name},
 		async: false,
 		success: function (response){
 			$('#stable').html("");
@@ -55,7 +58,7 @@ try {
                     var consolidate_review_by   =val.consolidate_review_by;
                     var consolidate_finalsubmit =val.consolidate_finalsubmit;
                     var registrar_finalsubmit=val.registrar_finalsubmit;
-                    var bg_color=registrar_finalsubmit=="Y"?"#0080001f":"";
+                    var bg_color=consolidate_finalsubmit=="Y"?"#0080001f":"#a9424226";
                     
                     var governbody_finalsubmit= val.governbody_finalsubmit;
                     	bg_color=governbody_finalsubmit=="Y"?"#a9424226":bg_color;
@@ -71,8 +74,8 @@ try {
                     	+'<td style="text-align:center; width:8%;">'+REG_FOR_NAME+'</td>'
                     	+'<td style="text-align:center; width:8%;">'+contact+'</td>'
                     	+'<td style="text-align:center; width:8%;">'+email+'</td>'
-                    	+'<td style="text-align:center; width:10%;"><a onclick="downloadJasperReport('+"'"+''+AF_REG_ID+''+"'"+','+"'"+''+session_id+''+"'"+')"><b>Click Here to View</b></a></td>'
-                    	+'<td style="text-align:center; width:8%;">'+panel_name+'</td>'
+                    	+'<td style="text-align:center; width:10%;"><a onclick="downloadJasperReport('+"'"+''+AF_REG_ID+''+"'"+','+"'"+''+session_id+''+"'"+')"><b>View Application Details</b></a></td>'
+                    	/*+'<td style="text-align:center; width:8%;">'+panel_name+'</td>'
                     	
                     	if(consolidate_finalsubmit=='Y' && governbody_finalsubmit!='Y'){
                 			cols +='<td style="text-align:center; width:6%;">'
@@ -83,7 +86,12 @@ try {
                     		cols +='<td style="text-align:center; width:6%;">'
                 			cols +='<button type="button" class="btn btn-success" '
             				cols +='id="" onClick="actionClick('+"'"+''+panel_name+''+"'"+','+"'"+''+AF_REG_ID+''+"'"+','+"'"+''+panel_code+''+"'"+','+"'"+''+cons_remark+''+"'"+','+"'"+''+cons_recm+''+"'"+','+"'"+''+REG_FOR_NAME+''+"'"+','+"'"+''+consolidate_finalsubmit+''+"'"+','+"'"+''+consolidate_review_by+''+"'"+',\''+consolidate_review_by_id+'\')">'+buttontext+'</button></td>'
-                        }
+                        }*/
+                    	if(consolidate_finalsubmit=='Y'){
+                    		cols +='<td style="text-align:center; width:10%;"><a onclick="openInspection('+"'"+''+AF_REG_ID+''+"'"+','+"'"+''+session_id+''+"'"+','+"'"+''+consolidate_review_by_id+''+"'"+')"><b>View Inspection Details</b></a></td>'
+                    	}else{
+                    		cols +='<td style="text-align:center; width:10%;"><a onclick="openInspection('+"'"+''+AF_REG_ID+''+"'"+','+"'"+''+session_id+''+"'"+','+"'"+''+consolidate_review_by_id+''+"'"+')"><b>Pending at CDO/ADM Nominated by DM</b></a></td>'
+                    	}
                     	cols +='<input type="hidden" id="registrar_inspection_id_'+AF_REG_ID+'" value="'+val.registrar_inspection_id+'" />'
                     	+'<input type="hidden" id="registrar_id_'+AF_REG_ID+'" value="'+val.registrar_id+'" />'
                     	+'<input type="hidden" id="registrar_remarks_'+AF_REG_ID+'" value="'+val.registrar_remarks+'" />'
@@ -173,12 +181,12 @@ function Resetbtn(){
 	$("#Recommendation").val("");
 }
 
-function openInspection(Inst_id,session_id,isfinalsubmited,is_pannel_member,panned_member){
+function openInspection(Inst_id,session_id,convinor_id,is_pannel_member,panned_member){
 	try {
 		if(Inst_id!="" ){
 			document.myform.target="InspectionDetailViewFrame";
 			document.myform.action="inspector_inspection_detail_view.jsp?Inst_Id="+Inst_id+"&session_id="+session_id+
-							"&isfinalsubmited=Y&is_pannel_member=N&inspection_by_id="+isfinalsubmited;
+							"&isfinalsubmited=Y&is_pannel_member=N&convinor_id="+convinor_id+"&inspection_mode=registrar";
 			document.myform.submit();
 			   $('html, body').animate({
 			         scrollTop: $(".containerframe").offset().top

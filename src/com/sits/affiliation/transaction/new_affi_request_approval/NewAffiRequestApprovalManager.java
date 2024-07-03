@@ -32,7 +32,7 @@ public class NewAffiRequestApprovalManager {
 		 ArrayList<NewAffiRequestApprovalModel> al = new ArrayList<NewAffiRequestApprovalModel>();
 		 try{
 			 conn=DBConnection.getConnection();
-			qry=" select AF_REG_ID, REG_NO, (select DESCP1 from cparam where CODE='AKTU_PORT' and SERIAL='REG_TYP' and PDOC=REG_TYP) REG_TYP, "
+			qry=" select AF_REG_ID, REG_NO,DIRECTOR_NAME, (select DESCP1 from cparam where CODE='AKTU_PORT' and SERIAL='REG_TYP' and PDOC=REG_TYP) REG_TYP, "
 				+ "REG_FOR_NAME, PROP_INST_NAME, CONTACT, EMAIL, is_reg_approved,(case when (select InstituteCode from af_already_reg_clg_mast arc "
 				+ "where arc.InstituteCode=acrm.clg_code) is not null then 'Existing Affiliation' when(select Applicaion_ID from af_already_reg_noc_mast "
 				+ "arf where arf.Applicaion_ID=acrm.clg_code) is not null then 'New (Registered Offline)'else 'New Affiliation' end) as affiliation_type,"
@@ -51,7 +51,7 @@ public class NewAffiRequestApprovalManager {
 			 if(!General.checknull(umodel.getReg_type()).equals("")){
 				  qry+=" and REG_TYP='"+umodel.getReg_type()+"'";
 			 }	
-			 System.out.println("getList"+qry);
+			System.out.println("getList"+qry);
 			psmt=conn.prepareStatement(qry);
 			 rst=psmt.executeQuery();
 			 while(rst.next()){
@@ -65,6 +65,7 @@ public class NewAffiRequestApprovalManager {
 				 model.setEmail_id(General.checknull(rst.getString("EMAIL")));
 				 model.setApp_status(General.checknull(rst.getString("is_reg_approved")));
 				 model.setAffiliation_type(General.checknull(rst.getString("affiliation_type")));
+				 model.setDIRECTOR_NAME(General.checknull(rst.getString("DIRECTOR_NAME")));;
 				 al.add(model);
 			 }
 		 }catch(Exception e){

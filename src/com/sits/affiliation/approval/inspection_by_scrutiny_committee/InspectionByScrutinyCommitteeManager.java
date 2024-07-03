@@ -255,7 +255,8 @@ public class InspectionByScrutinyCommitteeManager {
 				+ "<b>Greeting from Dr. A.P.J. Abdul Kalam Technical University</b><br></br>"
 				+ "Your Affiliation Form (" + Reg_no + ") has been Re-Opened, You are requested to update the information "
 				+ "within 3 Days (As per University Guidline).<br><br>"
-				+ "(<b>Inspection Remarks :</b> " + scrutiny_remarks + "<br><br><br><br>"
+				+ "<b>Inspection Remarks :</b> " + scrutiny_remarks + "<br><br><br><br>"
+				+ "<b>Note :</b> After Update the Details, Please do Final Submit<br><br><br><br>"
 				+ "<b>Warm Regards,</b><br>" 
 				+ "Dr. A.P.J. Abdul Kalam Technical University!";
 		}else{

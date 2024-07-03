@@ -94,6 +94,8 @@ public class InspectorInspectionService extends HttpServlet {
 			raModel.setEmail_id(General.checknull(request.getParameter("email_id")));
 			raModel.setXTODATE(General.checknull(request.getParameter("XTODATE")));
 			raModel.setXFROMDATE(General.checknull(request.getParameter("XFROMDATE")));
+			raModel.setS_district(General.checknull((String)request.getSession().getAttribute("s_district")));
+			System.out.println("s_district||"+raModel.getS_district());
 			finalResult = InspectorInspectionManager.getApplicationDetails(raModel);
 
 			response.setContentType("application/json");
@@ -142,6 +144,8 @@ public class InspectorInspectionService extends HttpServlet {
             model.setInfraDetails((JSONArray) obj.get("InfraDetails"));
             model.setFacultyDetails((JSONArray) obj.get("facultyDetails"));
             model.setQuestionnairesDetails((JSONArray) obj.get("questionnaireDetails"));
+            model.setMembersDetails((JSONArray) obj.get("membersDetails"));
+            
             finalResult = InspectorInspectionManager.save(model, machine, user_id,items);
           
         	response.setContentType("application/json");

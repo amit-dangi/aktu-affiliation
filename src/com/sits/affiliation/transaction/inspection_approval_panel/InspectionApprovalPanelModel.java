@@ -19,6 +19,7 @@ public class InspectionApprovalPanelModel extends Common
     private String iss_active;
     private String Panel_det_id;
     private String emp_type;
+    private String district;
     
     private ArrayList<InspectionApprovalPanelModel> list;
     
@@ -142,5 +143,13 @@ public class InspectionApprovalPanelModel extends Common
 
 	public void setEmp_type(String emp_type) {
 		this.emp_type = emp_type;
+	}
+
+	public String getDistrict() {
+		return district;
+	}
+
+	public void setDistrict(String district) {
+		this.district = district;
 	}
 }

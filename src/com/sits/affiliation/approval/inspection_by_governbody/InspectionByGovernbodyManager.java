@@ -61,7 +61,7 @@ public class InspectionByGovernbodyManager {
  					+ "as registrar_remarks, imd.insp_recm as registrar_recm,imd.isfinalsubmited as registrar_finalsubmit "
  					+ ",imd2.inspection_id as governbody_inspection_id,imd2.inspection_by as governbody_id,imd2.insp_remarks as governbody_remarks, imd2.insp_recm as governbody_recm,imd2.isfinalsubmited as governbody_finalsubmit "
  					+ "from af_clg_reg_mast crm,af_apply_for_affiliation "
- 					+ "aff left join af_inspection_member_detail imd on aff.session=imd.session and imd.inspection_type='Registrar' and aff.AFF_ID=imd.af_reg_id "
+ 					+ "aff left join af_inspection_member_detail imd on aff.session=imd.session and imd.inspection_type='Inspector' and aff.AFF_ID=imd.af_reg_id "
  					+ "left join af_inspection_member_detail imd2 on aff.session=imd2.session and imd2.inspection_type='GovernBody' and aff.AFF_ID=imd2.af_reg_id "
  					+ "where crm.AF_REG_ID=aff.AFF_ID and is_final_submit_app='Y' and imd.isfinalsubmited='Y' and aff.session='"+General.checknull(raModel.getSession_id())+"' ";
  		        	 			
