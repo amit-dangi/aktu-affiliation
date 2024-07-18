@@ -2,6 +2,7 @@ package com.sits.affiliation.approval.inspector_inspection_detail;
 
 import org.json.simple.JSONArray;
 
+import com.sits.affiliation.approval.inspection_by_scrutiny_committee.InspectionByScrutinyCommitteeModel;
 import com.sits.general.Common;
 
 
@@ -31,7 +32,8 @@ public class InspectorInspectionModel extends Common {
 	private String degree;
 	private String s_district;
 	private String is_convinor;
-	
+	private String Inspection_type;
+	private String loginId;
 	
 	public String getPROP_INST_NAME() {
 		return PROP_INST_NAME;
@@ -625,6 +627,18 @@ public class InspectorInspectionModel extends Common {
 	}
 	public void setIs_convinor(String is_convinor) {
 		this.is_convinor = is_convinor;
+	}
+	public String getInspection_type() {
+		return Inspection_type;
+	}
+	public void setInspection_type(String inspection_type) {
+		Inspection_type = inspection_type;
+	}
+	public String getLoginId() {
+		return loginId;
+	}
+	public void setLoginId(String loginId) {
+		this.loginId = loginId;
 	}
 
 	

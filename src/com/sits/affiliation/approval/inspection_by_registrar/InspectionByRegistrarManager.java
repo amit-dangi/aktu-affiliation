@@ -60,7 +60,9 @@ public class InspectionByRegistrarManager {
 	 			
 	 			conn = DBConnection.getConnection();
 	 			
- 			query="select distinct aff.session,aff.request_id,crm.DISTRICT,concat(crm.PROP_INST_NAME,' (',crm.clg_code,')') as PROP_INST_NAME,contact,"
+ 			query="select distinct (select concat(file_attachment_id,'_',file_name) from file_attachment where reference_id=crm.AF_REG_ID "
+ 				+ "and table_name='af_inspection_member_detail' and file_type='inspection_file' order by CREATED desc limit 1) as memberfile,"
+ 				+ "aff.session,aff.request_id,crm.DISTRICT,concat(crm.PROP_INST_NAME,' (',crm.clg_code,')') as PROP_INST_NAME,contact,"
 				+ "email,crm.AF_REG_ID,REG_NO,date_format(review_date,'%d/%m/%Y') as review_date,panel_code,review_remarks,"
 				+ "aimd.isfinalsubmited as consolidate_finalsubmit,aimd.insp_remarks as consolidate_insp_remarks,"
 				+ "aimd.insp_recm as consolidate_insp_recm, aimd.inspection_by as consolidate_review_by,(select panel_name "
@@ -124,7 +126,7 @@ public class InspectionByRegistrarManager {
 							 json.put("consolidate_review_by",General.checknull(jsn1.get("desc").toString()));
 						}
 					  }
-	 				
+ 					
 					 json.put("REG_FOR_NAME",General.checknull(rst.getString("PROP_INST_NAME")));
 					 json.put("contact",General.checknull(rst.getString("contact")));
 					 json.put("email",General.checknull(rst.getString("email")));
@@ -164,6 +166,7 @@ public class InspectionByRegistrarManager {
 					 json.put("governbody_recm",General.checknull(rst.getString("governbody_recm")));
 					 json.put("governbody_finalsubmit",General.checknull(rst.getString("governbody_finalsubmit")));
 					 json.put("isfinal_acknowledge",General.checknull(rst.getString("isfinal_acknowledge")));
+					 json.put("memberfile",General.checknull(rst.getString("memberfile")));
 					 jsonArray.add(json);
 	        	 }
 	        	 objectJson.put("Applicationlist", jsonArray);

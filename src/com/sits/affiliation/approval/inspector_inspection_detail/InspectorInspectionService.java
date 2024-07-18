@@ -75,6 +75,14 @@ public class InspectorInspectionService extends HttpServlet {
 			break;
 		case "PD":
 			ProgDetail(request, response);
+			break;
+		case "GET_REOPEN_DETAILS":
+			getApplicationDetailsForReopen(request, response);
+			break;
+		case "SAVE_REOPEN":
+			saveReopenrequest(request, response);
+			break;
+			
 		default: System.out.println("Invalid grade InspectorInspectionService");
 		}
 	}
@@ -95,6 +103,7 @@ public class InspectorInspectionService extends HttpServlet {
 			raModel.setXTODATE(General.checknull(request.getParameter("XTODATE")));
 			raModel.setXFROMDATE(General.checknull(request.getParameter("XFROMDATE")));
 			raModel.setS_district(General.checknull((String)request.getSession().getAttribute("s_district")));
+			raModel.setLoginId(General.checknull((String)request.getSession().getAttribute("login_id")));
 			System.out.println("s_district||"+raModel.getS_district());
 			finalResult = InspectorInspectionManager.getApplicationDetails(raModel);
 
@@ -178,5 +187,95 @@ public class InspectorInspectionService extends HttpServlet {
 				log.fatal(Logging.logException("InspectorInspectionService[ProgDetail]", e.toString()));
 			}
 		}
+		
+		/*Void Method to get the getApplicationDetailsForReopen saved details*/
+		public synchronized void getApplicationDetailsForReopen(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, JSONException {
+			// TODO Auto-generated method stub
+			try{
+				PrintWriter out = response.getWriter();
+				response.setContentType("application/json");
+				JSONObject finalResult= new JSONObject();
+				InspectorInspectionModel raModel= new  InspectorInspectionModel();
+				raModel.setInspection_by(General.checknull(request.getParameter("inspection_by")));
+				raModel.setSession_id(General.checknull(request.getParameter("session_id")));
+				raModel.setInst_name(General.checknull(request.getParameter("inst_name")));
+				raModel.setMobile_no(General.checknull(request.getParameter("mobile_no")));
+				raModel.setEmail_id(General.checknull(request.getParameter("email_id")));
+				raModel.setXTODATE(General.checknull(request.getParameter("XTODATE")));
+				raModel.setXFROMDATE(General.checknull(request.getParameter("XFROMDATE")));
+				raModel.setS_district(General.checknull((String)request.getSession().getAttribute("s_district")));
+				
+				finalResult = InspectorInspectionManager.getApplicationDetailsForReopen(raModel);
+				System.out.println("finalResult||"+finalResult);
+				response.setContentType("application/json");
+			    response.setHeader("Cache-Control", "no-store");
+			    out.print(finalResult);
+			    
+			}catch (Exception e) {
+				// TODO: handle exception
+				System.out.println("EXCEPTION CAUSED BY: InspectorInspectionService [getApplicationDetailsForReopen]"+" "+e.getMessage().toUpperCase());
+				log.fatal(Logging.logException("InspectorInspectionService [getApplicationDetailsForReopen]", e.toString()));
+			}
+		}
 	
+		@SuppressWarnings("unchecked")
+		public synchronized void saveReopenrequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, JSONException {
+			try {
+				PrintWriter out = response.getWriter();
+				response.setContentType("application/json");
+				JSONObject finalResult = new JSONObject();
+				String uniqueKey = General.checknull((String) request.getSession().getAttribute("AESUniqueKey"));
+				String encData = General.checknull(request.getParameter("encData"));
+				String decodeData = new String(java.util.Base64.getDecoder().decode(encData));
+				String decData = AesUtil.parseAes(encData, aesUtil, uniqueKey);
+				JSONObject obj = (JSONObject) new JSONParser().parse(decData);
+
+				String user_id = General.check_null((String) request.getSession().getAttribute("user_id"));
+				String machine = General.checknull((String) request.getSession().getAttribute("ip"));
+				String remarks = General.checknull((String) obj.get("insp_remarks"));
+				String status = General.checknull((String) obj.get("insp_status"));
+
+				if (General.checknull(user_id).equals("")) {
+					finalResult.put("flag", "N");
+					finalResult.put("status", "Session Expire");
+				} else if ((General.checknull(status).equals("R") || General.checknull(status).equals("O"))
+						&& General.checknull(remarks).equals("")) {
+					finalResult.put("flag", "N");
+					finalResult.put("status", "Remarks can not be blank");
+				} else if (General.checknull(status).equals("")) {
+					finalResult.put("flag", "N");
+					finalResult.put("status", "Status can not be blank");
+				} else {
+					InspectorInspectionModel model = new InspectorInspectionModel();
+					model.setRemarks(remarks);
+					model.setStatus(status);
+					model.setInspection_id(General.checknull((String) obj.get("Inst_Id")));
+					model.setInspection_by(General.checknull((String) request.getSession().getAttribute("employee_id")));
+					model.setInspection_type(General.checknull((String) obj.get("inspection_type")));
+					model.setSession_id(General.checknull((String) obj.get("session_id")));
+					model.setIp(machine);
+					model.setUpdatedBy(user_id);
+
+					String save = "";
+					save = InspectorInspectionManager.saveReopen(model);
+					if (save.equals("1")) {
+						finalResult.put("flag", "Y");
+						finalResult.put("status", "Application Re-Open Successfully");
+					} else {
+						finalResult.put("flag", "N");
+						finalResult.put("status", ApplicationConstants.FAIL);
+					}
+				}
+				response.setContentType("application/json");
+				response.setHeader("Cache-Control", "no-store");
+				String jString = aesUtil.encrypt(finalResult.toString(), decodeData.split("::")[0], uniqueKey, decodeData.split("::")[1]);
+				out.println(new Gson().toJson(jString));
+
+				// out.print(finalResult);
+			} catch (Exception e) {
+				// TODO: handle exception
+				System.out.println("EXCEPTION CAUSED BY: InspectionByScrutinyCommitteeService [saverequest]" + e.getMessage().toUpperCase());
+				log.fatal(Logging.logException("InspectionByScrutinyCommitteeService [saverequest]", e.toString()));
+			}
+		}
 }

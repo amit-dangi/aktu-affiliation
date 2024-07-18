@@ -14,10 +14,10 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
+import org.json.JSONString;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import com.sits.affiliation.transaction.inspection_approval_panel.InspectionApprovalPanelManager;
 import com.sits.commonApi.commonAPI;
 import com.sits.conn.DBConnection;
 import com.sits.general.ApplicationConstants;
@@ -374,14 +374,15 @@ public class InspectorInspectionManager {
 		 			JSONArray deparr = (JSONArray) jsonobj.get("commondata");
 	        	 
 	        	conn = DBConnection.getConnection();
-	        	query="select distinct (select isfinalsubmited from af_inspection_member_detail where af_reg_id=crm.AF_REG_ID and session=aff.session and inspection_type='Inspector' and inspection_by='"+General.checknull(raModel.getInspection_by())+"' order by CREATED_DATE desc limit 1) as isfinalsubmited,"
+	        	query="select distinct request_id,(select isfinalsubmited from af_inspection_member_detail where af_reg_id=crm.AF_REG_ID and session=aff.session and inspection_type='Inspector' and inspection_by in (select member_type from af_approv_pannel_detail where panel_id=crm.panel_code and issActive='Y' and is_convenor='Y') order by CREATED_DATE desc limit 1) as isfinalsubmited,"
 	        			+ "session,PROP_INST_NAME,contact,email,AF_REG_ID,REG_NO,date_format(Payment_Date,'%d/%m/%Y') as Payment_Date,panel_code,review_remarks,"
 	        			+ "is_final_submit_app,coalesce((select (case when member_type is not null then 'Y' else 'N' END) from af_approv_pannel_detail where panel_id=crm.panel_code and member_type='"+General.checknull(raModel.getInspection_by())+"' and issActive='Y' LIMIT 1),'N') "
 	        			+ "as is_pannel_member,coalesce((select (case when member_type is not null then 'Y' else 'N' END) from af_approv_pannel_detail where panel_id=crm.panel_code and member_type='"+General.checknull(raModel.getInspection_by())+"' and issActive='Y' and is_convenor='Y' LIMIT 1),'N') as is_convinor, "
     					+ "(select member_type from af_approv_pannel_detail where panel_id=crm.panel_code  and issActive='Y' and is_convenor='Y' LIMIT 1) as convinor_id,DISTRICT from af_clg_reg_mast crm,af_apply_for_affiliation aff "
-	        			+ "where crm.AF_REG_ID=aff.AFF_ID and is_final_submit_app='Y' and session='"+General.checknull(raModel.getSession_id())+"' and DISTRICT='"+General.checknull(raModel.getS_district())+"' ";
-	        			//		+ "and aff.request_id='RT0001' ";
-	        			
+	        			+ "where crm.AF_REG_ID=aff.AFF_ID and is_final_submit_app='Y' and session='"+General.checknull(raModel.getSession_id())+"' ";
+	        			if(raModel.getLoginId().toUpperCase().contains("DM")){
+	        				query += " and DISTRICT='"+General.checknull(raModel.getS_district())+"' and aff.request_id='RT0001' ";
+	        			}
 	        			if(!General.checknull(raModel.getInst_name()).trim().equals("")){
 	        				query += "and PROP_INST_NAME like '%"+General.checknull(raModel.getInst_name())+"%' ";
 						}
@@ -409,6 +410,8 @@ public class InspectorInspectionManager {
 							 json.put("session",General.checknull(jsn.get("desc").toString()));
 						}
 	 				}
+	 				
+	 				 json.put("request_id",General.checknull(rst.getString("request_id")));
 	        		 json.put("session_id",General.checknull(rst.getString("session")));
 					 json.put("REG_FOR_NAME",General.checknull(rst.getString("PROP_INST_NAME")));
 					 json.put("contact",General.checknull(rst.getString("contact")));
@@ -579,7 +582,7 @@ public class InspectorInspectionManager {
 					}
 					
 					conn.commit();
-					jSonDataFinalObj.put("status", "CDO/ADM Inspection Details Saved Successfully");
+					jSonDataFinalObj.put("status", "Inspection Details Saved Successfully");
 					jSonDataFinalObj.put("flag", "Y");
 				}else {
 					conn.rollback();				
@@ -806,9 +809,9 @@ return status;
 public static Boolean savefacultyDetailsList(Connection conn,InspectorInspectionModel formModel) {
 	
 	PreparedStatement psmt,psmtdel = null;		
-	String query = "";
 	int[] cnt = null;
 	Boolean status=true;
+	String query = "";
 	//query="update af_faculty_detail set inspection_status=? where FD_ID=? ";
 	String inspection_by=General.checknull(formModel.getInspection_by());
 	String delqry = "delete from af_faculty_detail_inspection where inspection_by='"+inspection_by+"'"
@@ -957,7 +960,7 @@ public static ArrayList<InspectorInspectionModel> getAffiliationDetails(String I
 			+" as memberfile from af_apply_for_affiliation mrt, af_request_type rt, af_manage_request_type_sub_type st, af_manage_fee_configration "
 			+" fc where mrt.request_id=rt.req_id and mrt.sub_request_id=st.MRT_ID and mrt.request_id=fc.request_type and "
 			+" mrt.sub_request_id=fc.sub_request_type and fc. man_fee_config_id=mrt.fee_config_id and fc.req_type='AC' and mrt.AFF_ID='"+Inst_Id+"' "; 
-			//System.out.println("getAffiliationDetails ||"+qry);
+			System.out.println("getAffiliationDetails ||"+qry);
 		psmt = conn.prepareStatement(qry);
 		rst= psmt.executeQuery();
 		while(rst.next()){
@@ -1864,4 +1867,168 @@ public static JSONArray getUplData(String id) {
 		        return arr;
 		    }
 	
+	 /*Static Method to get the Application saved details if any or
+		get the selected proposal details from Project Proposal Submission form as per proposal id
+		Return type is object Json*/
+		public static JSONObject getApplicationDetailsForReopen(InspectorInspectionModel raModel) {
+	        PreparedStatement psmt = null;
+	        Connection conn=null;
+	        ResultSet rst = null;
+	        String query="";
+	        JSONObject objectJson=new JSONObject();        
+	        JSONArray jsonArray = new JSONArray();
+		         try {
+		        	  JSONObject jsonobj=new JSONObject();
+			 			JSONObject finalObject=new JSONObject();
+			 			finalObject.put("tablename", "academic_session_master");
+			 			finalObject.put("columndesc","session");
+			 			finalObject.put("id", "id");
+			 			
+			 			jsonobj= commonAPI.getDropDownByWebService("rest/apiServices/masterdetails", finalObject);
+			 			JSONArray deparr = (JSONArray) jsonobj.get("commondata");
+		        	 
+		        	conn = DBConnection.getConnection();
+		        	query="select distinct (select isfinalsubmited from af_inspection_member_detail where af_reg_id=crm.AF_REG_ID and session=aff.session and inspection_type='Inspector' and inspection_by='"+General.checknull(raModel.getInspection_by())+"' order by CREATED_DATE desc limit 1) as isfinalsubmited,"
+		        			+ "session,PROP_INST_NAME,contact,email,AF_REG_ID,REG_NO,date_format(Payment_Date,'%d/%m/%Y') as Payment_Date,panel_code,review_remarks,"
+		        			+ "is_final_submit_app,coalesce((select (case when member_type is not null then 'Y' else 'N' END) from af_approv_pannel_detail where panel_id=crm.panel_code and member_type='"+General.checknull(raModel.getInspection_by())+"' and issActive='Y' LIMIT 1),'N') "
+		        			+ "as is_pannel_member,coalesce((select (case when member_type is not null then 'Y' else 'N' END) from af_approv_pannel_detail where panel_id=crm.panel_code and member_type='"+General.checknull(raModel.getInspection_by())+"' and issActive='Y' and is_convenor='Y' LIMIT 1),'N') as is_convinor, "
+	    					+ "(select member_type from af_approv_pannel_detail where panel_id=crm.panel_code  and issActive='Y' and is_convenor='Y' LIMIT 1) as convinor_id,DISTRICT from af_clg_reg_mast crm,af_apply_for_affiliation aff "
+		        			+ "where crm.AF_REG_ID=aff.AFF_ID and session='"+General.checknull(raModel.getSession_id())+"' and DISTRICT='"+General.checknull(raModel.getS_district())+"' ";
+		        			//		+ "and aff.request_id='RT0001' ";
+		        			
+		        			if(!General.checknull(raModel.getInst_name()).trim().equals("")){
+		        				query += "and PROP_INST_NAME like '%"+General.checknull(raModel.getInst_name())+"%' ";
+							}
+		        			if(!General.checknull(raModel.getMobile_no()).trim().equals("")){
+		        				query += "and contact='"+General.checknull(raModel.getEmail_id())+"' ";
+							}
+		        			if(!General.checknull(raModel.getEmail_id()).trim().equals("")){
+				        		query += "and email='"+General.checknull(raModel.getEmail_id())+"' ";
+							}
+		        			if(!(General.checknull(raModel.getXFROMDATE()).trim().equals("") && General.checknull(raModel.getXTODATE()).trim().equals("")) ){
+				        		query += "and date_format(review_date,'%d/%m/%Y') between '"+General.checknull(raModel.getXTODATE())+"' and '"+General.checknull(raModel.getXFROMDATE())+"' ";
+							}
+		        			query += "and crm.panel_code is not null and AF_REG_ID in (select af_reg_id from af_inspection_member_detail where isfinalsubmited='Y') order by is_final_submit_app_dt asc";
+		 			psmt = conn.prepareStatement(query);
+		 			System.out.println("InspectorInspectionManager getApplicationDetailsForReopen psmt||"+psmt);
+		 			rst = psmt.executeQuery();
+		 			
+		 			while (rst.next()) {
+		 				JSONObject json= new JSONObject();
+		 				String sess=rst.getString("session");
+		 				
+		 				deparr.forEach(jssn-> {
+		 					JSONObject jval = (JSONObject) jssn;
+								if(jval.get("id").equals(sess))
+								{
+									 json.put("session",General.checknull(jval.get("desc").toString()));
+								}
+		 				});
+		 				
+		        		 json.put("session_id",General.checknull(sess));
+						 json.put("REG_FOR_NAME",General.checknull(rst.getString("PROP_INST_NAME")));
+						 json.put("contact",General.checknull(rst.getString("contact")));
+						 json.put("email",General.checknull(rst.getString("email")));
+						 json.put("AF_REG_ID",General.checknull(rst.getString("AF_REG_ID")));
+						 json.put("REG_NO",General.checknull(rst.getString("REG_NO")));
+						 json.put("Payment_Date",General.checknull(rst.getString("Payment_Date")));
+						 json.put("panel_code",General.checknull(rst.getString("panel_code")));
+						 json.put("remarks",General.checknull(rst.getString("review_remarks")));
+						 json.put("isfinalsubmited_convinor",General.checknull(rst.getString("isfinalsubmited")));
+						 json.put("is_final_submit_app",General.checknull(rst.getString("is_final_submit_app")));
+						 json.put("is_pannel_member",General.checknull(rst.getString("is_pannel_member")));
+						 json.put("is_convinor",General.checknull(rst.getString("is_convinor")));
+						 json.put("convinor_id",General.checknull(rst.getString("convinor_id")));
+						 jsonArray.add(json);
+		        	 }
+		        	 
+		        	 objectJson.put("Applicationlist", jsonArray);
+		        	 
+		          } catch (Exception e) {
+		           System.out.println("FileName=[InspectorInspectionManager] MethodName=[getApplicationDetailsForReopen()] :"+ e.getMessage().toString());
+		           l.fatal(Logging.logException("FileName=[InspectorInspectionManager] MethodName=[getApplicationDetailsForReopen()] :", e.getMessage().toString()));
+		          }finally {
+		              try {
+		                  if (rst != null) {
+		                      rst.close();
+		                      rst = null;
+		                  }
+		                  if (psmt != null) {
+		                	  psmt.close();
+		                	  psmt = null;
+		                  }
+		                  if (conn != null) {
+		                      conn.close();
+		                      conn = null;
+		                  }
+		              } catch (final Exception e) {
+		            	  l.fatal(Logging.logException("FileName=[InspectorInspectionManager],MethodName=[getApplicationDetails()]", e.getMessage().toString()));
+		              }
+		          }
+		         return objectJson;
+		    }
+		
+		public static String saveReopen(InspectorInspectionModel formModel) {
+			l = Logger.getLogger("exceptionlog");
+			Connection conn = null;
+			PreparedStatement psmt = null;
+			String query = "", msg = "0";
+			int cnt = 0, count = 0;
+			try {
+				conn = DBConnection.getConnection();
+				conn.setAutoCommit(false);
+				query = "insert into af_inspection_member_detail (session,af_reg_id,inspection_by,insp_remarks,"
+						+ "CREATED_BY,CREATED_DATE,CREATED_MACHINE,inspection_type,isfinalsubmited) values(?,?,?,?,?,now(),?,?,?)";
+				psmt = conn.prepareStatement(query);
+				psmt.setString(1, General.checknull(formModel.getSession_id()));
+				psmt.setString(2, General.checknull(formModel.getInspection_id()));
+				psmt.setString(3, General.checknull(formModel.getInspection_by()));
+				psmt.setString(4, General.checknull(formModel.getRemarks()));
+				psmt.setString(5, General.checknull(formModel.getUpdatedBy()));
+				psmt.setString(6, General.checknull(formModel.getIp()));
+				psmt.setString(7, General.checknull(formModel.getInspection_type()));
+				psmt.setString(8, General.checknull(formModel.getStatus()));
+				count = psmt.executeUpdate();
+
+				if (count > 0) {
+					if (General.checknull(formModel.getStatus()).equals("RO")) {
+						query = "";psmt = null;
+						/*This query will be used we need to open the inspection page as well with portal after final submit
+						 * query="UPDATE af_clg_reg_mast acm,af_inspection_member_detail aim "
+								+ "SET acm.is_final_submit_app='N',aim.isfinalsubmited='N' , acm.is_final_submit_app_dt=now() WHERE acm.AF_REG_ID=? "
+								+ "and acm.AF_REG_ID=aim.af_reg_id and aim.inspection_type='Inspector'";
+						*/
+						query = "UPDATE af_clg_reg_mast SET is_final_submit_app='N', is_final_submit_app_dt=now() WHERE AF_REG_ID=?";
+						psmt = conn.prepareStatement(query);
+						psmt.setString(1, General.checknull(formModel.getInspection_id()));
+						cnt = psmt.executeUpdate();
+					}
+					
+					if (General.checknull(formModel.getStatus()).equals("Y")) {
+						query = "";psmt = null;
+						query = "UPDATE af_clg_reg_mast SET is_final_submit_app='Y' WHERE AF_REG_ID=?";
+						psmt = conn.prepareStatement(query);
+						psmt.setString(1, General.checknull(formModel.getInspection_id()));
+						cnt = psmt.executeUpdate();
+					}
+					conn.commit();
+					msg = "1";
+				} else {
+					conn.rollback();
+					msg = "0";
+				}
+			} catch (Exception e) {
+				msg = "0";
+				System.out.println("Exception in InspectorInspectionManager[saveReopen]" + " " + e.getMessage());
+				l.fatal(Logging.logException("InspectorInspectionManager[saveReopen]", e.toString()));
+			} finally {
+				try {
+					conn.close();
+					psmt.close();
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+			return msg;
+		}
 }

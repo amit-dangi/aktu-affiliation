@@ -16,7 +16,7 @@ $(document).ready(function(){
 	        $('#btnSave,#btnSave1').text("Application Re-open & acknowledgement mail shared to college");
 	    }
 	});
-	
+	getDist('ST0001','','district');
 	// use for the get  AcademicSession  
 	getAcademicSession();
 	
@@ -36,11 +36,14 @@ function getApplicationDetail(){
 	var email_id=$('#email_id').val();
 	var XTODATE=$('#XTODATE').val();
 	var XFROMDATE=$('#XFROMDATE').val();
+	var district=$('#district').val();
+	var request_name=$('#request_name').val();
 	try {
 		$.ajax({
 			type: "POST",
 			url: "../InspectionByScrutinyCommitteeService",
-			data:{"fstatus":"GETDETAILS", "session_id":session_id, "inst_name":inst_name, "mobile_no":mobile_no, "email_id":email_id, "XTODATE":XTODATE, "XFROMDATE":XFROMDATE},
+			data:{"fstatus":"GETDETAILS", "session_id":session_id, "inst_name":inst_name, "mobile_no":mobile_no,
+				"email_id":email_id, "XTODATE":XTODATE, "XFROMDATE":XFROMDATE,"district":district,"request_name":request_name},
 			async: false,
 			success: function (response){
 				$('#stable').html("");

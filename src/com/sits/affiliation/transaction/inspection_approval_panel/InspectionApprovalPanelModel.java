@@ -3,8 +3,7 @@ package com.sits.affiliation.transaction.inspection_approval_panel;
 import java.util.ArrayList;
 import com.sits.general.Common;
 
-public class InspectionApprovalPanelModel extends Common
-{
+public class InspectionApprovalPanelModel extends Common{
     private String panel_id;
     private String panel_code;
     private String panel_name;
@@ -19,7 +18,6 @@ public class InspectionApprovalPanelModel extends Common
     private String iss_active;
     private String Panel_det_id;
     private String emp_type;
-    private String district;
     
     private ArrayList<InspectionApprovalPanelModel> list;
     
@@ -145,11 +143,4 @@ public class InspectionApprovalPanelModel extends Common
 		this.emp_type = emp_type;
 	}
 
-	public String getDistrict() {
-		return district;
-	}
-
-	public void setDistrict(String district) {
-		this.district = district;
-	}
 }

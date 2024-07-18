@@ -28,6 +28,7 @@ if (session_id == "") {
 	var XFROMDATE=$('#XFROMDATE').val();
 	var district=$('#district').val();
 	var request_name=$('#request_name').val();
+	var submit_status=$('#submit_status').val();
 try {
 	$.ajax({
 		type: "POST",
@@ -43,6 +44,7 @@ try {
 			 if (typeof response.Applicationlist!= 'undefined' && response.Applicationlist.length > 0) {
 				$.each(response.Applicationlist, function (key, val) {
 					$("#searchTable").show();
+					var memberfile	= val.memberfile;
 					var session 	= val.session;
                     var AF_REG_ID 	= val.AF_REG_ID;
                     var email 		= val.email;
@@ -65,7 +67,10 @@ try {
                     	
                 	var isfinal_acknowledge=val.isfinal_acknowledge;
                 		bg_color=isfinal_acknowledge=="Y"?"#3d8d3d91":bg_color;
-                		
+            		
+    		if((submit_status=='pending' && consolidate_finalsubmit!='Y' ) || 
+    				(submit_status=='submitted' && consolidate_finalsubmit=='Y')
+    				|| (submit_status=='')){
                     index=index+1;
                     var cols ='<tr style="background-color:'+bg_color+';" >'
                     	+'<td style="text-align:center; width:3%;">'+index+'</td>'
@@ -88,10 +93,12 @@ try {
             				cols +='id="" onClick="actionClick('+"'"+''+panel_name+''+"'"+','+"'"+''+AF_REG_ID+''+"'"+','+"'"+''+panel_code+''+"'"+','+"'"+''+cons_remark+''+"'"+','+"'"+''+cons_recm+''+"'"+','+"'"+''+REG_FOR_NAME+''+"'"+','+"'"+''+consolidate_finalsubmit+''+"'"+','+"'"+''+consolidate_review_by+''+"'"+',\''+consolidate_review_by_id+'\')">'+buttontext+'</button></td>'
                         }*/
                     	if(consolidate_finalsubmit=='Y'){
-                    		cols +='<td style="text-align:center; width:10%;"><a onclick="openInspection('+"'"+''+AF_REG_ID+''+"'"+','+"'"+''+session_id+''+"'"+','+"'"+''+consolidate_review_by_id+''+"'"+')"><b>View Inspection Details</b></a></td>'
+                    		cols +='<td style="text-align:center; width:10%;"><a onclick="openInspection('+"'"+''+AF_REG_ID+''+"'"+','+"'"+''+session_id+''+"'"+','+"'"+''+consolidate_review_by_id+''+"'"+')"><b>View Submmitted Inspection Details</b></a></td>'
+                    		cols +='<td style="text-align:center; width:6%; cursor: pointer; word-break: break-word !important;"><b><a href="../downloadfile?filename='+memberfile+'&folderName=INSPECTOR_INSPECTION/'+AF_REG_ID+'/&fstatus=dwnFileFrmDir" target="_blank">'+memberfile+'</b></a></td>'
                     	}else{
-                    		cols +='<td style="text-align:center; width:10%;"><a onclick="openInspection('+"'"+''+AF_REG_ID+''+"'"+','+"'"+''+session_id+''+"'"+','+"'"+''+consolidate_review_by_id+''+"'"+')"><b>Pending at CDO/ADM Nominated by DM</b></a></td>'
-                    	}
+                    		cols +='<td style="text-align:center; width:10%;"><a onclick="openInspection('+"'"+''+AF_REG_ID+''+"'"+','+"'"+''+session_id+''+"'"+','+"'"+''+consolidate_review_by_id+''+"'"+')"><b>Pending at CDO/ADM/Professor nominated by VC</b></a></td>'
+                    		cols +='<td style="text-align:center; width:6%;">-</td>'
+                        	}
                     	cols +='<input type="hidden" id="registrar_inspection_id_'+AF_REG_ID+'" value="'+val.registrar_inspection_id+'" />'
                     	+'<input type="hidden" id="registrar_id_'+AF_REG_ID+'" value="'+val.registrar_id+'" />'
                     	+'<input type="hidden" id="registrar_remarks_'+AF_REG_ID+'" value="'+val.registrar_remarks+'" />'
@@ -103,9 +110,10 @@ try {
                     	+'<input type="hidden" id="reg_name_'+AF_REG_ID+'" value="'+val.REG_FOR_NAME+'" />'
                     	+'<input type="hidden" id="email_'+AF_REG_ID+'" value="'+val.email+'" />'
                     	cols +='</tr>'
-        				$('#stable').append(cols);
+                		$('#stable').append(cols);
                     	$("#searchTable").show();
                     	$("#headerdiv").show();
+    		}
 				});
 			 }else{
 				  $('#stable').html("");

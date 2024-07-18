@@ -8,13 +8,17 @@ $(document).ready(function(){
 	$("#btnReset, #btnReset1, #btnReset2").click(function(){
 		location.reload();
 	});
-	$("#Insp_recm_1").change(function(){
+	/*$("#Insp_recm_1").change(function(){
 		var selectedvalue = $(this).find('option:selected').val();
 		if(selectedvalue!='')
 			showRemarks(selectedvalue,'1');
-	});
+	});*/
 	
 	getAcademicSession();
+	setTimeout(function() {
+		getApplicationDetail();
+	}, 300);
+	
 });
 
 function allowOnlyNumeric(event) {
@@ -32,7 +36,6 @@ function getApplicationDetail(){
 	
 		//Validate file as click on view
 		var session_id=$('#session_id').val();
-		
 		if(session_id == ""){ 
 			$('#session_id').focus();	
 			showerr($("#session_id")[0], "Session is required.","block");
@@ -74,6 +77,7 @@ function getApplicationDetail(){
 	                    var is_pannel_member= val.is_pannel_member;
 	                    var is_convinor		= val.is_convinor;
 	                    var convinor_id		= val.convinor_id;
+	                    var request_id		= val.request_id;
 	                    
 	                    if(is_pannel_member=='Y' /*|| $('#user_status').val()=='A'*/){
 	                    	index=index+1;
@@ -84,12 +88,12 @@ function getApplicationDetail(){
 	                    	+'<td style="text-align:center; width:8%;">'+REG_FOR_NAME+'</td>'
 	                    	+'<td style="text-align:center; width:8%;">'+contact+'</td>'
 	                    	+'<td style="text-align:center; width:8%;">'+email+'</td>'
-	                    	+'<td style="text-align:center; width:8%;"><a style="color:green;cursor: pointer;" id="inspectionhref" onclick=openInspection('+"'"+''+AF_REG_ID+''+"'"+','+"'"+''+session_id+''+"'"+','+"'"+''+isfinalsubmited+''+"'"+','+"'"+''+is_pannel_member+''+"'"+','+"'"+'N'+"'"+',\''+is_convinor+'\',\''+convinor_id+'\')>Start Inspection & View Application Form</a></td>'
+	                    	+'<td style="text-align:center; width:8%;"><a style="color:green;cursor: pointer;" id="inspectionhref" onclick=openInspection('+"'"+''+AF_REG_ID+''+"'"+','+"'"+''+session_id+''+"'"+','+"'"+''+isfinalsubmited+''+"'"+','+"'"+''+is_pannel_member+''+"'"+','+"'"+'N'+"'"+',\''+is_convinor+'\',\''+convinor_id+'\',\''+request_id+'\',\''+session+'\')>Start Inspection & View Application Form</a></td>'
 	                    	if(isfinalsubmited=='Y'){
 	                    		cols +='<td style="text-align:center; width:8%; color: #2c5e2c;"><b>Submitted</b></td>'	
 	                    	}else{
 	                    		if(is_convinor=='Y'){
-	                    		cols +='<td style="text-align:center; width:8%;"><button type="button" class="btn btn-view1" style="background-color:#2c5e2c !important; color: #ffffff;" onclick=openInspection('+"'"+''+AF_REG_ID+''+"'"+','+"'"+''+session_id+''+"'"+','+"'"+''+isfinalsubmited+''+"'"+','+"'"+''+is_pannel_member+''+"'"+','+"'"+'Y'+"'"+',\''+is_convinor+'\',\''+convinor_id+'\')>Submit</button></td>'
+	                    		cols +='<td style="text-align:center; width:8%;"><button type="button" class="btn btn-view1" style="background-color:#2c5e2c !important; color: #ffffff;" onclick=openInspection('+"'"+''+AF_REG_ID+''+"'"+','+"'"+''+session_id+''+"'"+','+"'"+''+isfinalsubmited+''+"'"+','+"'"+''+is_pannel_member+''+"'"+','+"'"+'Y'+"'"+',\''+is_convinor+'\',\''+convinor_id+'\',\''+request_id+'\',\''+session+'\')>Submit</button></td>'
 	                    		}else{
                     			cols +='<td style="text-align:center; width:8%; color: #a94442f7;"><b>Only Panel Head Allowed</b></td>'	
 	                    		}
@@ -121,13 +125,13 @@ function getApplicationDetail(){
 	
 }
 
-function openInspection(Inst_id,session_id,isfinalsubmited,is_pannel_member,IsSubmitClick,is_convinor,convinor_id){
+function openInspection(Inst_id,session_id,isfinalsubmited,is_pannel_member,IsSubmitClick,is_convinor,convinor_id,request_id,session_name){
 	try {
 		if(Inst_id!="" ){
 			document.InspectionDetailFrame.target="InspectionDetailViewFrame";
 			document.InspectionDetailFrame.action="inspector_inspection_detail_view.jsp?Inst_Id="+Inst_id+"&session_id="+session_id+
 							"&isfinalsubmited="+isfinalsubmited+"&is_pannel_member="+is_pannel_member+"&IsSubmitClick="+IsSubmitClick+
-							"&is_convinor="+is_convinor+"&convinor_id="+convinor_id ;
+							"&is_convinor="+is_convinor+"&convinor_id="+convinor_id+"&request_id="+request_id+"&session_name="+session_name ;
 			document.InspectionDetailFrame.submit();
 			   $('html, body').animate({
 			         scrollTop: $(".containerframe").offset().top
@@ -141,7 +145,7 @@ function openInspection(Inst_id,session_id,isfinalsubmited,is_pannel_member,IsSu
 	}
 }
 
-function save(savetype,isfinalsubmited,Inst_Id){
+function save(savetype,isfinalsubmited,Inst_Id,login_id){
 			var form_data = new FormData();
 			var workarray = [];
 			var exp_index = "1";
@@ -170,7 +174,7 @@ function save(savetype,isfinalsubmited,Inst_Id){
 				}*/
 				var membersrno = $("#membersrno").val();
 				for(var i = 0; i < membersrno; i++){
-					if(is_convinor=='Y'){
+					if((login_id || '').includes("dm")){
 					 if($("#XNAME_"+ i).val()==""){
 							$('#XNAME_'+i).focus();	
 							showerr($("#XNAME_"+ i)[0], "Member Name is Required.","block");
@@ -204,6 +208,7 @@ function save(savetype,isfinalsubmited,Inst_Id){
 							return false;
 							}
 				}
+				
 			}catch(e){
 				alert("ERROR :"+e);
 			}
@@ -358,7 +363,7 @@ function save(savetype,isfinalsubmited,Inst_Id){
 			//Members Details  
 			var membersDetails = [];
 			var membersrno = $("#membersrno").val();
-			for(var i = 0; i < membersrno; i++){debugger;
+			for(var i = 0; i < membersrno; i++){
 				if ($("#Insp_recm_" +(i+1)).val() != "" && $("#Insp_recm_" + (i+1)).val() != undefined) {
 					var arr = {
 							XMTYPE   	: $("#XMTYPE_"+ i).val(), 
@@ -372,7 +377,7 @@ function save(savetype,isfinalsubmited,Inst_Id){
 							}
 					membersDetails.push(arr);
 				}
-				}
+				}debugger;
 			
 			var jsonObject={"session_id":session_id,"Inst_Id":Inst_Id,"is_convinor":is_convinor,/*"insp_remarks":insp_remarks,"insp_recm":insp_recm,*/"isfinalsubmited":isfinalsubmited,
 							"computerDetails":computerDetails,"facilityDetails":facilityDetails,"administrativeDetails":administrativeDetails,
@@ -381,7 +386,7 @@ function save(savetype,isfinalsubmited,Inst_Id){
 				console.log("inspector-inspection-detail Save Json Object");
 				jsonobj=JSON.stringify(jsonObject);
 				console.log(jsonobj);
-			//return;
+			//return false;
 			var xmlHttp = new XMLHttpRequest();
 			xmlHttp.open("POST", "../InspectorInspectionService?fstatus="+savetype+"&Inst_Id="+Inst_Id, true);
 			
@@ -557,4 +562,17 @@ function allowNumberOrDecimal(object)
 		 }
 
    }
+}
+
+function callModalForFaculty(Inst_Id){
+	 $('#reportDiolog').modal({backdrop: 'static', keyboard: false},'show');
+	 $('#showframe').html("");
+	 $('#showframe').append('<iframe class="embed-responsive-item" onload="resizeIframe(this)" name="1_Report" id="1_Report" width="100%;" height="" src="inspection_faculty_detail.jsp?Inst_Id='+Inst_Id+' " frameborder="0" scrolling="no"></iframe>');
+}
+
+
+function callModalForDocument(Inst_Id,request_id,session_name){
+	 $('#reportDiolog2').modal({backdrop: 'static', keyboard: false},'show');
+	 $('#showframe_uploaddoc').html("");
+	 $('#showframe_uploaddoc').append('<iframe class="embed-responsive-item" onload="resizeIframe(this)" name="1_Report" id="1_Report" width="100%;" height="" src="inspection_upload_documents.jsp?Inst_Id='+Inst_Id+'&request_id='+request_id+'&session_name='+session_name+' " frameborder="0" scrolling="no"></iframe>');
 }

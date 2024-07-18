@@ -65,6 +65,12 @@ public class ReviewApplicationManager {
 	        			if(!General.checknull(raModel.getEmail_id()).trim().equals("")){
 			        		query += "and email='"+General.checknull(raModel.getEmail_id())+"' ";
 						}
+	        			if(!General.checknull(raModel.getDistrict()).trim().equals("")){
+	                		query += "and DISTRICT='"+General.checknull(raModel.getDistrict())+"' ";
+	        			}
+	        			if(!General.checknull(raModel.getRequestType()).trim().equals("")){
+	                		query += "and request_id='"+General.checknull(raModel.getRequestType())+"' ";
+	        			}
 	        			if(!General.checknull(raModel.getXTODATE()).trim().equals("")){
 			        		query += "and Payment_Date='"+General.checknull(raModel.getXTODATE())+"' ";
 						}

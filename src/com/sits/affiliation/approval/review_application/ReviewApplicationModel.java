@@ -1,6 +1,8 @@
 package com.sits.affiliation.approval.review_application;
 
-public class ReviewApplicationModel {
+import com.sits.general.Common;
+
+public class ReviewApplicationModel extends Common {
 
 	private String session_id;
 	private String inst_name;

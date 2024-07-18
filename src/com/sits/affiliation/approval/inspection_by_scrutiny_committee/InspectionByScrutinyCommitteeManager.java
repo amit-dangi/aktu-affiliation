@@ -52,10 +52,10 @@ public class InspectionByScrutinyCommitteeManager {
 
 			conn = DBConnection.getConnection();
 
-			query = "select distinct date_format(is_final_submit_app_dt,'%d-%M-%Y %r') as is_final_submit_app_date,aff.session,concat(crm.PROP_INST_NAME,' (',crm.clg_code,')') as PROP_INST_NAME, contact, "
+			query = "select distinct aff.request_id,crm.DISTRICT,date_format(is_final_submit_app_dt,'%d-%M-%Y %r') as is_final_submit_app_date,aff.session,concat(crm.PROP_INST_NAME,' (',crm.clg_code,')') as PROP_INST_NAME, contact, "
 					+ "crm.clg_code,email, crm.AF_REG_ID, REG_NO,crm.is_final_submit_app,(select case when (isfinalsubmited='RO' and crm.is_final_submit_app='Y') then "
-					+ "'' ELSE isfinalsubmited end from af_inspection_member_detail where af_reg_id=crm.AF_REG_ID order by "
-					+ "CREATED_DATE desc limit 1) status, (select insp_remarks from af_inspection_member_detail where af_reg_id=crm.AF_REG_ID order by "
+					+ "'' ELSE isfinalsubmited end from af_inspection_member_detail where af_reg_id=crm.AF_REG_ID and inspection_type='Scrutiny_head' order by "
+					+ "CREATED_DATE desc limit 1) status, (select insp_remarks from af_inspection_member_detail where af_reg_id=crm.AF_REG_ID and inspection_type='Scrutiny_head' order by "
 					+ "CREATED_DATE desc limit 1) insp_remarks,(select if(DATE_ADD(CREATED_DATE, INTERVAL 3 DAY)>now(),'Y','N') as is_finalsubmit_open "
 					+ "from af_inspection_member_detail where inspection_type='Scrutiny_head' and af_reg_id=crm.AF_REG_ID "
 					+ "order by CREATED_DATE desc limit 1) as is_finalsubmit_open from af_clg_reg_mast crm, af_apply_for_affiliation aff where crm.AF_REG_ID=aff.AFF_ID and " 
@@ -70,8 +70,14 @@ public class InspectionByScrutinyCommitteeManager {
 			if (!General.checknull(raModel.getEmail_id()).trim().equals("")) {
 				query += "and email='" + General.checknull(raModel.getEmail_id().trim()) + "' ";
 			}
+			if(!General.checknull(raModel.getDistrict()).trim().equals("")){
+        		query += "and DISTRICT='"+General.checknull(raModel.getDistrict())+"' ";
+			}
+			if(!General.checknull(raModel.getRequestType()).trim().equals("")){
+        		query += "and request_id='"+General.checknull(raModel.getRequestType())+"' ";
+			}
 			if (!(General.checknull(raModel.getXFROMDATE()).trim().equals("") && General.checknull(raModel.getXTODATE()).trim().equals(""))) {
-				query += "and date_format(review_date,'%d/%m/%Y') between '" + General.checknull(raModel.getXTODATE())+ "' and '" + General.checknull(raModel.getXFROMDATE()) + "' ";
+				query += "and date_format(crm.is_final_submit_app_dt,'%d/%m/%Y') between '" + General.checknull(raModel.getXTODATE())+ "' and '" + General.checknull(raModel.getXFROMDATE()) + "' ";
 			}
 			query += "order by is_final_submit_app_dt asc";
 			
